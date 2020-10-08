@@ -12,20 +12,19 @@
     "build": "npm run build-lib && npm run build-dist",
     "build-lib": "tsc",
     "build-dist": "browserify --standalone zxcvbn -t uglifyify lib/main.js > dist/zxcvbn.js",
-    "prepublish": "npm run build"
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "@types/tape": "^4.13.0",
-    "browserify": "^11.0.1",
-    "exorcist": "^0.4.0",
+    "browserify": "^16.5.2",
+    "exorcist": "^1.0.1",
     "faucet": "^0.0.1",
-    "istanbul": "^0.3.18",
+    "istanbul": "^0.4.5",
     "sorcery": "^0.10.0",
-    "tape": "^4.13.3",
+    "tape": "^5.0.1",
     "typescript": "^4.0.3",
-    "uglifyify": "^3.0.1",
-    "watchify": "^3.3.1",
-    "zuul": "^3.4.0"
+    "uglifyify": "^5.0.2",
+    "watchify": "^3.3.1"
   },
   "keywords": [
     "password",
