@@ -8,7 +8,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import test from "tape";
-import matching from "../src/matching";
+import matching, { IStringTable } from "../src/matching";
 import adjacency_graphs from "../src/adjacency_graphs";
 
 // takes a pattern and list of prefixes/suffixes
@@ -167,7 +167,7 @@ test("matching utils", function (t) {
     ["", chr_map, ""],
     ["", {}, ""],
     ["abc", {}, "abc"],
-  ]) {
+  ] as [string, {}, string][]) {
     msg = `translates '${string}' to '${result}' with provided charmap`;
     t.equal(matching.translate(string, map), result, msg);
   }
@@ -407,7 +407,7 @@ test("l33t matching", function (t) {
     ["4", { a: ["4"] }],
     ["4@", { a: ["4", "@"] }],
     ["4({60", { a: ["4"], c: ["(", "{"], g: ["6"], o: ["0"] }],
-  ]) {
+  ] as [string, IStringTable][]) {
     msg =
       "reduces l33t table to only the substitutions that a password might be employing";
     t.deepEquals(
@@ -428,7 +428,7 @@ test("l33t matching", function (t) {
         { "4": "a", "(": "c" },
       ],
     ],
-  ]) {
+  ] as [IStringTable, IStringTable[]][]) {
     msg =
       "enumerates the different sets of l33t substitutions a password might be using";
     t.deepEquals(matching.enumerate_l33t_subs(table), subs, msg);
@@ -530,7 +530,7 @@ test("spatial matching", function (t) {
   }
 
   // for testing, make a subgraph that contains a single keyboard
-  let _graphs = { qwerty: adjacency_graphs.qwerty };
+  let _graphs: { qwerty?: IStringTable } = { qwerty: adjacency_graphs.qwerty };
   let pattern = "6tfGHJ";
   let matches = matching.spatial_match(`rz!${pattern}%z`, _graphs);
   msg = "matches against spatial patterns surrounded by non-spatial patterns";
@@ -563,7 +563,7 @@ test("spatial matching", function (t) {
     ["*-632.0214", "mac_keypad", 9, 0],
     ["aoEP%yIxkjq:", "dvorak", 4, 5],
     [";qoaOQ:Aoq;a", "dvorak", 11, 4],
-  ]) {
+  ] as [string, string, number, number][]) {
     _graphs = {};
     _graphs[keyboard] = adjacency_graphs[keyboard];
     matches = matching.spatial_match(pattern, _graphs);
@@ -636,7 +636,7 @@ test("sequence matching", function (t) {
     ["zxvt", "lower", false],
     ["0369", "digits", true],
     ["97531", "digits", false],
-  ]) {
+  ] as [string, string, boolean][]) {
     matches = matching.sequence_match(pattern);
     msg = `matches '${pattern}' as a '${name}' sequence`;
     check_matches(
@@ -814,7 +814,10 @@ test("date matching", function (t) {
 
   for (let order of ["mdy", "dmy", "ymd", "ydm"]) {
     const [d, m, y] = Array.from([8, 8, 88]);
-    password = order.replace("y", y).replace("m", m).replace("d", d);
+    password = order
+      .replace("y", y.toString())
+      .replace("m", m.toString())
+      .replace("d", d.toString());
     matches = matching.date_match(password);
     msg = `matches dates with '${order}' format`;
     check_matches(
@@ -960,7 +963,7 @@ test("omnimatch", function (t) {
     ["dictionary", [7, 15]],
     ["date", [16, 23]],
     ["repeat", [24, 27]],
-  ]) {
+  ] as [string, number[]][]) {
     const pattern_name = value[0],
       [i, j] = Array.from(value[1]);
     let included = false;

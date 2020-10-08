@@ -88,4 +88,4 @@ const time_estimates = {
   }
 };
 
-module.exports = time_estimates;
+export default time_estimates;
