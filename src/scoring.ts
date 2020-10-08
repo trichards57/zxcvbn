@@ -1,6 +1,14 @@
 import {
   IAnyMatch,
+  IBruteForceMatch,
+  IDateMatch,
+  IDictionaryList,
   IDictionaryMatch,
+  IMatch,
+  INullableStringTable,
+  IRegexMatch,
+  IRepeatMatch,
+  ISequenceMatch,
   ISpatialMatch,
   IStringTable,
 } from "./matching";
@@ -19,7 +27,7 @@ let k, v;
 
 // on qwerty, 'g' has degree 6, being adjacent to 'ftyhbv'. '\' has degree 1.
 // this calculates the average over all keys.
-const calc_average_degree = function (graph: IStringTable) {
+const calc_average_degree = function (graph: INullableStringTable) {
   let average = 0;
   for (let key in graph) {
     const neighbors = graph[key];
@@ -122,7 +130,7 @@ const scoring = {
   most_guessable_match_sequence(
     password: string,
     matches: IAnyMatch[],
-    _exclude_additive?
+    _exclude_additive?: boolean
   ): {
     sequence: IAnyMatch[];
     guesses: number;
@@ -133,7 +141,7 @@ const scoring = {
     let guesses, m;
     let asc4, end4;
     let _;
-    if (_exclude_additive == null) {
+    if (_exclude_additive == undefined) {
       _exclude_additive = false;
     }
     const n = password.length;
@@ -141,7 +149,7 @@ const scoring = {
     // partition matches into sublists according to ending index j
     const matches_by_j = (() => {
       let asc, end;
-      const result: any[] = [];
+      const result: IAnyMatch[][] = [];
       for (
         _ = 0, end = n, asc = 0 <= end;
         asc ? _ < end : _ > end;
@@ -166,7 +174,7 @@ const scoring = {
       // a shorter match sequence spanning the same prefix, optimal.m[k][l] is undefined.
       m: (() => {
         let asc1, end1;
-        const result1: any[] = [];
+        const result1: { [index: number]: IAnyMatch }[] = [];
         for (
           _ = 0, end1 = n, asc1 = 0 <= end1;
           asc1 ? _ < end1 : _ > end1;
@@ -181,7 +189,7 @@ const scoring = {
       // optimal.pi allows for fast (non-looping) updates to the minimization function.
       pi: (() => {
         let asc2, end2;
-        const result2: any[] = [];
+        const result2: { [index: number]: number }[] = [];
         for (
           _ = 0, end2 = n, asc2 = 0 <= end2;
           asc2 ? _ < end2 : _ > end2;
@@ -195,7 +203,7 @@ const scoring = {
       // same structure as optimal.m -- holds the overall metric.
       g: (() => {
         let asc3, end3;
-        const result3: any[] = [];
+        const result3: { [index: number]: number }[] = [];
         for (
           _ = 0, end3 = n, asc3 = 0 <= end3;
           asc3 ? _ < end3 : _ > end3;
@@ -209,7 +217,7 @@ const scoring = {
 
     // helper: considers whether a length-l sequence ending at match m is better (fewer guesses)
     // than previously encountered sequences, updating state if so.
-    const update = (m, l): boolean | undefined => {
+    const update = (m: IAnyMatch, l: number): number | undefined => {
       k = m.j;
       let pi = this.estimate_guesses(m, password);
       if (l > 1) {
@@ -228,7 +236,7 @@ const scoring = {
       // fare better than this sequence. if so, skip it and return.
       for (let competing_l in optimal.g[k]) {
         const competing_g = optimal.g[k][competing_l];
-        if (competing_l > l) {
+        if (((competing_l as unknown) as number) > l) {
           continue;
         }
         if (competing_g <= g) {
@@ -242,12 +250,12 @@ const scoring = {
     };
 
     // helper: evaluate bruteforce matches ending at k.
-    const bruteforce_update = (k) => {
+    const bruteforce_update = (k: number) => {
       // see if a single bruteforce match spanning the k-prefix is optimal.
       m = make_bruteforce_match(0, k);
       update(m, 1);
       return (() => {
-        const result4: (boolean | undefined)[][] = [];
+        const result4: (number | undefined)[][] = [];
         for (
           var i = 1, end4 = k, asc4 = 1 <= end4;
           asc4 ? i <= end4 : i >= end4;
@@ -259,7 +267,7 @@ const scoring = {
           m = make_bruteforce_match(i, k);
           result4.push(
             (() => {
-              const result5: (boolean | undefined)[] = [];
+              const result5: (number | undefined)[] = [];
               const object = optimal.m[i - 1];
               for (let l in object) {
                 const last_m = object[l];
@@ -283,7 +291,7 @@ const scoring = {
     };
 
     // helper: make bruteforce match objects spanning i to j, inclusive.
-    var make_bruteforce_match = (i, j) => {
+    var make_bruteforce_match = (i: number, j: number): IBruteForceMatch => {
       return {
         pattern: "bruteforce",
         token: password.slice(i, +j + 1 || undefined),
@@ -294,7 +302,7 @@ const scoring = {
 
     // helper: step backwards through optimal.m starting at the end,
     // constructing the final optimal match sequence.
-    const unwind = (n) => {
+    const unwind = (n: number) => {
       const optimal_match_sequence: any[] = [];
       let k = n - 1;
       // find the final best sequence length and score
@@ -358,7 +366,7 @@ const scoring = {
   // guess estimation -- one function per match pattern ---------------------------
   // ------------------------------------------------------------------------------
 
-  estimate_guesses(match, password) {
+  estimate_guesses(match: IAnyMatch, password: string) {
     if (match.guesses != null) {
       return match.guesses;
     } // a match's guess estimate doesn't change. cache it.
@@ -378,13 +386,39 @@ const scoring = {
       regex: this.regex_guesses,
       date: this.date_guesses,
     };
-    const guesses = estimation_functions[match.pattern].call(this, match);
+
+    let guesses: number;
+
+    switch (match.pattern) {
+      case "bruteforce":
+        guesses = this.bruteforce_guesses(match);
+        break;
+      case "date":
+        guesses = this.date_guesses(match);
+        break;
+      case "dictionary":
+        guesses = this.dictionary_guesses(match);
+        break;
+      case "regex":
+        guesses = this.regex_guesses(match);
+        break;
+      case "repeat":
+        guesses = this.repeat_guesses(match);
+        break;
+      case "sequence":
+        guesses = this.sequence_guesses(match);
+        break;
+      case "spatial":
+        guesses = this.spatial_guesses(match);
+        break;
+    }
+
     match.guesses = Math.max(guesses, min_guesses);
     match.guesses_log10 = this.log10(match.guesses);
     return match.guesses;
   },
 
-  bruteforce_guesses(match) {
+  bruteforce_guesses(match: IAnyMatch) {
     let guesses = Math.pow(BRUTEFORCE_CARDINALITY, match.token.length);
     if (guesses === Number.POSITIVE_INFINITY) {
       guesses = Number.MAX_VALUE;
@@ -398,11 +432,11 @@ const scoring = {
     return Math.max(guesses, min_guesses);
   },
 
-  repeat_guesses(match) {
+  repeat_guesses(match: IRepeatMatch) {
     return match.base_guesses * match.repeat_count;
   },
 
-  sequence_guesses(match) {
+  sequence_guesses(match: ISequenceMatch) {
     let base_guesses;
     const first_chr = match.token.charAt(0);
     // lower guesses for obvious starting points
@@ -428,8 +462,8 @@ const scoring = {
   MIN_YEAR_SPACE: 20,
   REFERENCE_YEAR: new Date().getFullYear(),
 
-  regex_guesses(match) {
-    const char_class_bases = {
+  regex_guesses(match: IRegexMatch) {
+    const char_class_bases: { [index: string]: number } = {
       alpha_lower: 26,
       alpha_upper: 26,
       alpha: 52,
@@ -451,9 +485,10 @@ const scoring = {
           return year_space;
       }
     }
+    return 0;
   },
 
-  date_guesses(match) {
+  date_guesses(match: IDateMatch) {
     // base guesses: (year distance from REFERENCE_YEAR) * num_days * num_years
     const year_space = Math.max(
       Math.abs(match.year - this.REFERENCE_YEAR),

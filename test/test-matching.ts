@@ -8,7 +8,16 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import test from "tape";
-import matching, { IStringTable } from "../src/matching";
+import matching, {
+  IAnyMatch,
+  IDictionary,
+  IDictionaryList,
+  IDictionaryMatch,
+  INullableStringTable,
+  INullableStringTableTable,
+  IStringTable,
+  ISubstitution,
+} from "../src/matching";
 import adjacency_graphs from "../src/adjacency_graphs";
 
 // takes a pattern and list of prefixes/suffixes
@@ -41,12 +50,12 @@ const genpws = function (
 };
 
 const check_matches = function (
-  prefix,
-  t,
-  matches,
-  pattern_names,
-  patterns,
-  ijs,
+  prefix: string,
+  t: test.Test,
+  matches: IAnyMatch[],
+  pattern_names: string[] | string,
+  patterns: string[],
+  ijs: number[][],
   props: { [index: string]: any[] }
 ) {
   let i;
@@ -108,7 +117,7 @@ const check_matches = function (
               prop_msg = `'${prop_msg}'`;
             }
             msg = `${prefix}: matches[${k}].${prop_name} == ${prop_msg}`;
-            result2.push(t.deepEqual(match[prop_name], prop_list[k], msg));
+            t.deepEqual(match[prop_name], prop_list[k], msg);
           }
           return result2;
         })()
@@ -128,33 +137,6 @@ test("matching utils", function (t) {
       ".empty returns false for non-empty objects and arrays"
     );
   }
-
-  const lst = [];
-  matching.extend(lst, []);
-  t.deepEqual(
-    lst,
-    [],
-    "extending an empty list with an empty list leaves it empty"
-  );
-  matching.extend(lst, [1]);
-  t.deepEqual(
-    lst,
-    [1],
-    "extending an empty list with another makes it equal to the other"
-  );
-  matching.extend(lst, [2, 3]);
-  t.deepEqual(
-    lst,
-    [1, 2, 3],
-    "extending a list with another adds each of the other's elements"
-  );
-  const [lst1, lst2] = Array.from([[1], [2]]);
-  matching.extend(lst1, lst2);
-  t.deepEqual(
-    lst2,
-    [2],
-    "extending a list by another doesn't affect the other"
-  );
 
   const chr_map = { a: "A", b: "B" };
   for (let [string, map, result] of [
@@ -208,8 +190,8 @@ test("matching utils", function (t) {
 
 test("dictionary matching", function (t) {
   let rank;
-  const dm = (pw) => matching.dictionary_match(pw, test_dicts);
-  var test_dicts = {
+  const dm = (pw: string) => matching.dictionary_match(pw, test_dicts);
+  var test_dicts: IDictionaryList = {
     d1: {
       motherboard: 1,
       mother: 2,
@@ -434,7 +416,7 @@ test("l33t matching", function (t) {
     t.deepEquals(matching.enumerate_l33t_subs(table), subs, msg);
   }
 
-  const lm = (pw) => matching.l33t_match(pw, dicts, test_table);
+  const lm = (pw: string) => matching.l33t_match(pw, dicts, test_table);
   var dicts = {
     words: {
       aac: 1,
@@ -449,26 +431,34 @@ test("l33t matching", function (t) {
 
   t.deepEquals(lm(""), [], "doesn't match ''");
   t.deepEquals(lm("password"), [], "doesn't match pure dictionary words");
-  for ([password, pattern, word, dictionary_name, rank, ij, sub] of [
-    ["p4ssword", "p4ssword", "password", "words", 3, [0, 7], { "4": "a" }],
-    [
-      "p@ssw0rd",
-      "p@ssw0rd",
-      "password",
-      "words",
-      3,
-      [0, 7],
-      { "@": "a", "0": "o" },
-    ],
-    [
-      "aSdfO{G0asDfO",
-      "{G0",
-      "cgo",
-      "words2",
-      1,
-      [5, 7],
-      { "{": "c", "0": "o" },
-    ],
+  for ({ password, pattern, word, dictionary_name, rank, ij, sub } of [
+    {
+      password: "p4ssword",
+      pattern: "p4ssword",
+      word: "password",
+      dictionary_name: "words",
+      rank: 3,
+      ij: [0, 7],
+      sub: { "4": "a" },
+    },
+    {
+      password: "p@ssw0rd",
+      pattern: "p@ssw0rd",
+      word: "password",
+      dictionary_name: "words",
+      rank: 3,
+      ij: [0, 7],
+      sub: { "@": "a", "0": "o" },
+    },
+    {
+      password: "aSdfO{G0asDfO",
+      pattern: "{G0",
+      word: "cgo",
+      dictionary_name: "words2",
+      rank: 1,
+      ij: [5, 7],
+      sub: { "{": "c", "0": "o" },
+    },
   ]) {
     msg = "matches against common l33t substitutions";
     check_matches(msg, t, lm(password), "dictionary", [pattern], [ij], {
@@ -530,7 +520,9 @@ test("spatial matching", function (t) {
   }
 
   // for testing, make a subgraph that contains a single keyboard
-  let _graphs: { qwerty?: IStringTable } = { qwerty: adjacency_graphs.qwerty };
+  let _graphs: INullableStringTableTable = {
+    qwerty: adjacency_graphs.qwerty,
+  };
   let pattern = "6tfGHJ";
   let matches = matching.spatial_match(`rz!${pattern}%z`, _graphs);
   msg = "matches against spatial patterns surrounded by non-spatial patterns";
@@ -564,8 +556,9 @@ test("spatial matching", function (t) {
     ["aoEP%yIxkjq:", "dvorak", 4, 5],
     [";qoaOQ:Aoq;a", "dvorak", 11, 4],
   ] as [string, string, number, number][]) {
-    _graphs = {};
-    _graphs[keyboard] = adjacency_graphs[keyboard];
+    _graphs = {
+      [keyboard]: adjacency_graphs[keyboard],
+    };
     matches = matching.spatial_match(pattern, _graphs);
     msg = `matches '${pattern}' as a ${keyboard} pattern`;
     check_matches(

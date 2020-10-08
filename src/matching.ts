@@ -12,17 +12,16 @@ let name;
 import frequency_lists from "./frequency_lists";
 import adjacency_graphs from "./adjacency_graphs";
 import scoring from "./scoring";
-import { NumberLiteralType } from "typescript";
 
-interface ISubstitution {
+export interface ISubstitution {
   [index: string]: string;
 }
 
-interface IDictionary {
+export interface IDictionary {
   [index: string]: number;
 }
 
-interface IDictionaryList {
+export interface IDictionaryList {
   [index: string]: IDictionary;
 }
 
@@ -36,12 +35,20 @@ interface IDMY {
   year: number;
 }
 
-export interface IStringTableTable {
-  [index: string]: IStringTable;
+export interface INullableStringTableTable {
+  [index: string]: INullableStringTable;
+}
+
+export interface INullableStringTable {
+  [index: string]: (string | null)[];
 }
 
 export interface IStringTable {
-  [index: string]: (string | null)[];
+  [index: string]: string[];
+}
+
+export interface IBoolTable {
+  [index: string]: boolean;
 }
 
 export interface ISortable {
@@ -51,14 +58,24 @@ export interface ISortable {
 
 export interface IMatch extends ISortable {
   token: string;
+  pattern:
+    | "repeat"
+    | "sequence"
+    | "dictionary"
+    | "regex"
+    | "date"
+    | "spatial"
+    | "bruteforce";
   guesses?: number;
+  guesses_log10?: number;
+  [index: string]: any;
 }
 
 export interface IRepeatMatch extends IMatch {
   pattern: "repeat";
   base_token: string;
   base_guesses: number;
-  base_matches: IAnyMatch[];
+  base_matches: IMatch[];
   repeat_count: number;
 }
 
@@ -95,6 +112,7 @@ export interface IDateMatch extends IMatch {
   year: number;
   month: number;
   day: number;
+  has_full_year?: boolean;
 }
 
 export interface ISpatialMatch extends IMatch {
@@ -106,13 +124,18 @@ export interface ISpatialMatch extends IMatch {
   shifted_count: number;
 }
 
+export interface IBruteForceMatch extends IMatch {
+  pattern: "bruteforce";
+}
+
 type IAnyMatch =
   | IRepeatMatch
   | IDictionaryMatch
   | ISpatialMatch
   | ISequenceMatch
   | IRegexMatch
-  | IDateMatch;
+  | IDateMatch
+  | IBruteForceMatch;
 
 export { IAnyMatch };
 
@@ -126,7 +149,7 @@ const build_ranked_dict = function (ordered_list: string[]) {
   return result;
 };
 
-const RANKED_DICTIONARIES = {};
+const RANKED_DICTIONARIES: IDictionaryList = {};
 for (name in frequency_lists) {
   const lst = frequency_lists[name];
   RANKED_DICTIONARIES[name] = build_ranked_dict(lst);
@@ -158,7 +181,9 @@ const REGEXEN = { recent_year: /19\d\d|200\d|201\d/g };
 
 const DATE_MAX_YEAR = 2050;
 const DATE_MIN_YEAR = 1000;
-const DATE_SPLITS = {
+const DATE_SPLITS: {
+  [index: number]: number[][];
+} = {
   4: [
     // for length-4 strings, eg 1191 or 9111, two ways to split:
     [1, 2], // 1 1 91 (2nd split starts at index 1, 3rd at index 2)
@@ -186,19 +211,8 @@ const DATE_SPLITS = {
 };
 
 const matching = {
-  empty(obj) {
-    return (
-      (() => {
-        const result: any[] = [];
-        for (let k in obj) {
-          result.push(k);
-        }
-        return result;
-      })().length === 0
-    );
-  },
-  extend(lst, lst2) {
-    return lst.push.apply(lst, lst2);
+  empty(obj: {}) {
+    return Object.keys(obj).length === 0;
   },
   translate(string: string, chr_map: ISubstitution) {
     return string
@@ -206,7 +220,7 @@ const matching = {
       .map((chr: string) => chr_map[chr] || chr)
       .join("");
   },
-  mod(n, m) {
+  mod(n: number, m: number) {
     return ((n % m) + m) % m;
   }, // mod impl that works for negative numbers
   sorted<T extends ISortable>(matches: T[]) {
@@ -218,8 +232,8 @@ const matching = {
   // omnimatch -- combine everything ----------------------------------------------
   // ------------------------------------------------------------------------------
 
-  omnimatch(password): IAnyMatch[] {
-    const matches: IAnyMatch[] = [];
+  omnimatch(password: string): IAnyMatch[] {
+    let matches: IAnyMatch[] = [];
     const matchers: ((password: string) => IAnyMatch[])[] = [
       this.dictionary_match,
       this.reverse_dictionary_match,
@@ -231,7 +245,7 @@ const matching = {
       this.date_match,
     ];
     for (let matcher of Array.from(matchers)) {
-      this.extend(matches, matcher.call(this, password));
+      matches = [...matches, ...matcher.call(this, password)];
     }
     return this.sorted(matches);
   },
@@ -241,7 +255,7 @@ const matching = {
   //-------------------------------------------------------------------------------
 
   dictionary_match(
-    password,
+    password: string,
     _ranked_dictionaries: IDictionaryList | undefined = undefined
   ): IDictionaryMatch[] {
     // _ranked_dictionaries variable is for unit testing purposes
@@ -308,7 +322,7 @@ const matching = {
     return this.sorted(matches);
   },
 
-  set_user_input_dictionary(ordered_list) {
+  set_user_input_dictionary(ordered_list: string[]) {
     return (RANKED_DICTIONARIES["user_inputs"] = build_ranked_dict(
       ordered_list.slice()
     ));
@@ -324,7 +338,7 @@ const matching = {
     for (let chr of Array.from(password.split(""))) {
       password_chars[chr] = true;
     }
-    const subtable = {};
+    const subtable: IStringTable = {};
     for (let letter in table) {
       const subs = table[letter];
       const relevant_subs = Array.from(subs).filter(
@@ -351,7 +365,7 @@ const matching = {
     const dedup = function (subs: any[]) {
       let v, k;
       const deduped: any[] = [];
-      const members = {};
+      const members: IBoolTable = {};
       for (var sub of Array.from(subs)) {
         var assoc = (() => {
           const result1: [string, number][] = [];
@@ -378,7 +392,7 @@ const matching = {
       return deduped;
     };
 
-    var helper = function (keys: string[]) {
+    var helper = function (keys: string[]): void {
       if (!keys.length) {
         return;
       }
@@ -427,7 +441,7 @@ const matching = {
   },
 
   l33t_match(
-    password,
+    password: string,
     _ranked_dictionaries: IDictionaryList | undefined = undefined,
     _l33t_table: IStringTable | undefined = undefined
   ) {
@@ -492,17 +506,15 @@ const matching = {
   // spatial match (qwerty/dvorak/keypad) -----------------------------------------
   // ------------------------------------------------------------------------------
 
-  spatial_match(password, _graphs?) {
-    if (_graphs == null) {
+  spatial_match(password: string, _graphs?: INullableStringTableTable) {
+    if (_graphs == undefined) {
       _graphs = GRAPHS;
     }
-    const matches = [];
+    const matches: ISpatialMatch[] = [];
     for (let graph_name in _graphs) {
       const graph = _graphs[graph_name];
-      this.extend(
-        matches,
-        this.spatial_match_helper(password, graph, graph_name)
-      );
+      for (const m of this.spatial_match_helper(password, graph, graph_name))
+        matches.push(m);
     }
     return this.sorted(matches);
   },
@@ -510,7 +522,7 @@ const matching = {
   SHIFTED_RX: /[~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>?]/,
   spatial_match_helper(
     password: string,
-    graph: IStringTable,
+    graph: INullableStringTable,
     graph_name: string
   ) {
     const matches: ISpatialMatch[] = [];
@@ -590,14 +602,14 @@ const matching = {
   // repeats (aaa, abcabcabc) and sequences (abcdef) ------------------------------
   //-------------------------------------------------------------------------------
 
-  repeat_match(password) {
+  repeat_match(password: string) {
     const matches: IRepeatMatch[] = [];
     const greedy = /(.+)\1+/g;
     const lazy = /(.+?)\1+/g;
     const lazy_anchored = /^(.+?)\1+$/;
     let lastIndex = 0;
     while (lastIndex < password.length) {
-      var base_token, match;
+      var base_token, match: RegExpExecArray;
       greedy.lastIndex = lazy.lastIndex = lastIndex;
       const greedy_match = greedy.exec(password);
       const lazy_match = lazy.exec(password);
@@ -618,7 +630,7 @@ const matching = {
         // lazy beats greedy for 'aaaaa'
         //   greedy: [aaaa,  aa]
         //   lazy:   [aaaaa, a]
-        match = lazy_match;
+        match = lazy_match!;
         base_token = match[1];
       }
       const [i, j] = Array.from([
@@ -648,7 +660,7 @@ const matching = {
   },
 
   MAX_DELTA: 5,
-  sequence_match(password) {
+  sequence_match(password: string) {
     // Identifies sequences by looking for repeated differences in unicode codepoint.
     // this allows skipping, such as 9753, and also matches some extended unicode sequences
     // such as Greek and Cyrillic alphabets.
@@ -666,7 +678,7 @@ const matching = {
       return [];
     }
 
-    const update = (i, j, delta) => {
+    const update = (i: number, j: number, delta: number) => {
       if (j - i > 1 || Math.abs(delta) === 1) {
         let middle;
         if (0 < (middle = Math.abs(delta)) && middle <= this.MAX_DELTA) {
@@ -721,7 +733,7 @@ const matching = {
       i = j;
       last_delta = delta;
     }
-    update(i, password.length - 1, last_delta);
+    update(i, password.length - 1, last_delta!);
     return result;
   },
 
@@ -757,7 +769,7 @@ const matching = {
   // date matching ----------------------------------------------------------------
   //-------------------------------------------------------------------------------
 
-  date_match(password) {
+  date_match(password: string) {
     // a "date" is recognized as:
     //   any 3-tuple that starts or ends with a 2- or 4-digit year,
     //   with 2 or 0 separator chars (1.1.91 or 1191),
@@ -831,7 +843,7 @@ $\
         // ie, considering '111504', prefer 11-15-04 to 1-1-1504
         // (interpreting '04' as 2004)
         let best_candidate = candidates[0];
-        const metric = (candidate) =>
+        const metric = (candidate: IDMY) =>
           Math.abs(candidate.year - scoring.REFERENCE_YEAR);
         let min_distance = metric(candidates[0]);
         for (let candidate of Array.from(candidates.slice(1))) {
@@ -959,7 +971,7 @@ $\
     const possible_year_splits = [
       [ints[2], ints.slice(0, 2)], // year last
       [ints[0], ints.slice(1, 3)], // year first
-    ];
+    ] as [number, number[]][];
     for ([y, rest] of Array.from(possible_year_splits)) {
       if (DATE_MIN_YEAR <= y && y <= DATE_MAX_YEAR) {
         dm = this.map_ints_to_dm(rest);
@@ -993,7 +1005,7 @@ $\
     }
   },
 
-  map_ints_to_dm(ints) {
+  map_ints_to_dm(ints: number[]) {
     for (let [d, m] of [ints, ints.slice().reverse()]) {
       if (1 <= d && d <= 31 && 1 <= m && m <= 12) {
         return {
@@ -1004,7 +1016,7 @@ $\
     }
   },
 
-  two_to_four_digit_year(year) {
+  two_to_four_digit_year(year: number) {
     if (year > 99) {
       return year;
     } else if (year > 50) {

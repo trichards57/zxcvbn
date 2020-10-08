@@ -7,7 +7,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import scoring from "./scoring";
-import { IAnyMatch } from "./matching";
+import { IAnyMatch, IDictionaryMatch } from "./matching";
 
 interface IFeedbackItem {
   warning: string;
@@ -119,7 +119,10 @@ var feedback = {
     }
   },
 
-  get_dictionary_match_feedback(match, is_sole_match): IFeedbackItem {
+  get_dictionary_match_feedback(
+    match: IDictionaryMatch,
+    is_sole_match: boolean
+  ): IFeedbackItem {
     const warning = (() => {
       if (match.dictionary_name === "passwords") {
         if (is_sole_match && !match.l33t && !match.reversed) {
@@ -130,7 +133,10 @@ var feedback = {
           } else {
             return "This is a very common password";
           }
-        } else if (match.guesses_log10 <= 4) {
+        } else if (
+          match.guesses_log10 != undefined &&
+          match.guesses_log10 <= 4
+        ) {
           return "This is similar to a commonly used password";
         }
       } else if (match.dictionary_name === "english_wikipedia") {

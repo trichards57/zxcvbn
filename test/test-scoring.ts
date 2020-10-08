@@ -12,16 +12,24 @@ import matching, {
   IDateMatch,
   IDictionaryMatch,
   IMatch,
+  IRegexMatch,
+  IRepeatMatch,
+  ISequenceMatch,
   ISpatialMatch,
+  ISubstitution,
 } from "../src/matching";
 
 const { log2 } = scoring;
 const { log10 } = scoring;
 const { nCk } = scoring;
 const EPSILON = 1e-10; // truncate to 10th decimal place
-const truncate_float = (float) => Math.round(float / EPSILON) * EPSILON;
-const approx_equal = (t, actual, expected, msg) =>
-  t.equal(truncate_float(actual), truncate_float(expected), msg);
+const truncate_float = (float: number) => Math.round(float / EPSILON) * EPSILON;
+const approx_equal = (
+  t: test.Test,
+  actual: number,
+  expected: number,
+  msg: string
+) => t.equal(truncate_float(actual), truncate_float(expected), msg);
 
 test("nCk", function (t) {
   let k, n;
@@ -78,19 +86,23 @@ test("log", function (t) {
 
 test("search", function (t) {
   let ref, ref1, ref2, ref3, ref4;
-  const m = (i, j, guesses): IMatch & { pattern: string } => ({
+  const m = (i: number, j: number, guesses: number): IDateMatch => ({
     i,
     j,
     guesses,
     token: "abc",
-    pattern: "test",
+    pattern: "date",
+    day: 1,
+    month: 2,
+    separator: "/",
+    year: 3,
   });
   const password = "0123456789";
 
   // for tests, set additive penalty to zero.
   const exclude_additive = true;
 
-  let msg = (s) =>
+  let msg = (s: string) =>
     `returns one bruteforce match given an empty match sequence: ${s}`;
   let result = scoring.most_guessable_match_sequence(password, []);
   t.equal(result.sequence.length, 1, msg("result.length == 1"));
@@ -265,11 +277,15 @@ test("repeat guesses", function (t) {
       base_token,
       matching.omnimatch(base_token)
     ).guesses;
-    const match = {
+    const match: IRepeatMatch = {
       token,
       base_token,
       base_guesses,
       repeat_count,
+      pattern: "repeat",
+      base_matches: [],
+      i: 1,
+      j: 2,
     };
     const expected_guesses = base_guesses * repeat_count;
     const msg = `the repeat pattern '${token}' has guesses of ${expected_guesses}`;
@@ -285,10 +301,15 @@ test("sequence guesses", function (t) {
     ["4567", true, 10 * 4], // base10 * len-4
     ["7654", false, 10 * 4 * 2], // base10 * len 4 * descending
     ["ZYX", false, 4 * 3 * 2], // obvious start * len-3 * descending
-  ]) {
-    const match = {
+  ] as [string, boolean, number][]) {
+    const match: ISequenceMatch = {
       token,
       ascending,
+      pattern: "sequence",
+      i: 1,
+      j: 2,
+      sequence_name: "abc",
+      sequence_space: 1,
     };
     const msg = `the sequence pattern '${token}' has guesses of ${guesses}`;
     t.equal(scoring.sequence_guesses(match), guesses, msg);
@@ -297,10 +318,13 @@ test("sequence guesses", function (t) {
 });
 
 test("regex guesses", function (t) {
-  let match = {
+  let match: IRegexMatch = {
     token: "aizocdk",
     regex_name: "alpha_lower",
-    regex_match: ["aizocdk"],
+    regex_match: ["aizocdk"] as RegExpExecArray,
+    i: 1,
+    j: 2,
+    pattern: "regex",
   };
   let msg = "guesses of 26^7 for 7-char lowercase regex";
   t.equal(scoring.regex_guesses(match), Math.pow(26, 7), msg);
@@ -308,7 +332,10 @@ test("regex guesses", function (t) {
   match = {
     token: "ag7C8",
     regex_name: "alphanumeric",
-    regex_match: ["ag7C8"],
+    regex_match: ["ag7C8"] as RegExpExecArray,
+    i: 1,
+    j: 2,
+    pattern: "regex",
   };
   msg = "guesses of 62^5 for 5-char alphanumeric regex";
   t.equal(scoring.regex_guesses(match), Math.pow(2 * 26 + 10, 5), msg);
@@ -316,7 +343,10 @@ test("regex guesses", function (t) {
   match = {
     token: "1972",
     regex_name: "recent_year",
-    regex_match: ["1972"],
+    regex_match: ["1972"] as RegExpExecArray,
+    i: 1,
+    j: 2,
+    pattern: "regex",
   };
   msg = "guesses of |year - REFERENCE_YEAR| for distant year matches";
   t.equal(
@@ -328,7 +358,10 @@ test("regex guesses", function (t) {
   match = {
     token: "2005",
     regex_name: "recent_year",
-    regex_match: ["2005"],
+    regex_match: ["2005"] as RegExpExecArray,
+    i: 1,
+    j: 2,
+    pattern: "regex",
   };
   msg = "guesses of MIN_YEAR_SPACE for a year close to REFERENCE_YEAR";
   t.equal(scoring.regex_guesses(match), scoring.MIN_YEAR_SPACE, msg);
@@ -336,13 +369,16 @@ test("regex guesses", function (t) {
 });
 
 test("date guesses", function (t) {
-  let match = {
+  let match: IDateMatch = {
     token: "1123",
     separator: "",
     has_full_year: false,
     year: 1923,
     month: 1,
     day: 1,
+    i: 1,
+    j: 2,
+    pattern: "date",
   };
   let msg = `guesses for ${match.token} is 365 * distance_from_ref_year`;
   t.equal(
@@ -358,6 +394,9 @@ test("date guesses", function (t) {
     year: 2010,
     month: 1,
     day: 1,
+    i: 1,
+    j: 2,
+    pattern: "date",
   };
   msg = "recent years assume MIN_YEAR_SPACE.";
   msg += " extra guesses are added for separators.";
@@ -570,7 +609,7 @@ test("l33t variants", function (t) {
     ["a4a4aa", nCk(6, 2) + nCk(6, 1), { "4": "a" }],
     ["4a4a44", nCk(6, 2) + nCk(6, 1), { "4": "a" }],
     ["a44att+", (nCk(4, 2) + nCk(4, 1)) * nCk(3, 1), { "4": "a", "+": "t" }],
-  ]) {
+  ] as [string, number, ISubstitution][]) {
     match = {
       token: word,
       rank: 32,
