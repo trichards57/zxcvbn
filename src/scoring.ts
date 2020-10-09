@@ -28,13 +28,7 @@ const calc_average_degree = function (
     const neighbors = graph[key];
     average += neighbors.filter((n) => n).length;
   }
-  average /= (() => {
-    const result: string[] = [];
-    for (k in graph) {
-      result.push(k);
-    }
-    return result;
-  })().length;
+  average /= Object.keys(graph).length;
   return average;
 };
 
@@ -131,13 +125,7 @@ export function most_guessable_match_sequence(
   const n = password.length;
 
   // partition matches into sublists according to ending index j
-  const matches_by_j = (() => {
-    const result: IAnyMatch[][] = [];
-    for (let _ = 0; _ < n; _++) {
-      result.push([]);
-    }
-    return result;
-  })();
+  const matches_by_j = new Array(password.length).fill([]) as IAnyMatch[][];
   for (m of matches) {
     matches_by_j[m.j].push(m);
   }
@@ -151,32 +139,14 @@ export function most_guessable_match_sequence(
     // password prefix up to k, inclusive.
     // if there is no length-l sequence that scores better (fewer guesses) than
     // a shorter match sequence spanning the same prefix, optimal.m[k][l] is undefined.
-    m: (() => {
-      const result1: { [index: number]: IAnyMatch }[] = [];
-      for (let _ = 0; _ < n; _++) {
-        result1.push({});
-      }
-      return result1;
-    })(),
+    m: matches_by_j.map(() => ({})) as IAnyMatch[][],
 
     // same structure as optimal.m -- holds the product term Prod(m.guesses for m in sequence).
     // optimal.pi allows for fast (non-looping) updates to the minimization function.
-    pi: (() => {
-      const result2: { [index: number]: number }[] = [];
-      for (let _ = 0; _ < n; _++) {
-        result2.push({});
-      }
-      return result2;
-    })(),
+    pi: matches_by_j.map(() => ({})) as Record<number, number>[],
 
     // same structure as optimal.m -- holds the overall metric.
-    g: (() => {
-      const result3: { [index: number]: number }[] = [];
-      for (let _ = 0; _ < n; _++) {
-        result3.push({});
-      }
-      return result3;
-    })(),
+    g: matches_by_j.map(() => ({})) as Record<number, number>[],
   };
 
   // helper: considers whether a length-l sequence ending at match m is better (fewer guesses)
