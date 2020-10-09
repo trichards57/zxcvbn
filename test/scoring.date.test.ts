@@ -1,5 +1,10 @@
 import { IDateMatch } from "../src/matching";
-import { date_guesses, MIN_YEAR_SPACE, REFERENCE_YEAR } from "../src/scoring";
+import {
+  date_guesses,
+  estimate_guesses,
+  MIN_YEAR_SPACE,
+  REFERENCE_YEAR,
+} from "../src/scoring";
 
 describe("scoring", () => {
   describe("date_guesses", () => {
@@ -17,6 +22,23 @@ describe("scoring", () => {
       };
 
       const actual = date_guesses(match);
+      expect(actual).toBe(365 * (REFERENCE_YEAR - match.year));
+    });
+
+    it("is delegated to by estimate_guesses", () => {
+      const match: IDateMatch = {
+        token: "1923",
+        separator: "",
+        has_full_year: false,
+        year: 1923,
+        month: 1,
+        day: 1,
+        i: 1,
+        j: 2,
+        pattern: "date",
+      };
+
+      const actual = estimate_guesses(match, match.token);
       expect(actual).toBe(365 * (REFERENCE_YEAR - match.year));
     });
 
