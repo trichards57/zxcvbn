@@ -119,67 +119,6 @@ const check_matches = function (
   })();
 };
 
-test("matching utils", function (t) {
-  let msg: string;
-  t.ok(matching.empty([]), ".empty returns true for an empty array");
-  t.ok(matching.empty({}), ".empty returns true for an empty object");
-  for (const obj of [[1], [1, 2], [[]], { a: 1 }, { 0: {} }]) {
-    t.notOk(
-      matching.empty(obj),
-      ".empty returns false for non-empty objects and arrays"
-    );
-  }
-
-  const chr_map = { a: "A", b: "B" };
-  for (const [string, map, result] of [
-    ["a", chr_map, "A"],
-    ["c", chr_map, "c"],
-    ["ab", chr_map, "AB"],
-    ["abc", chr_map, "ABc"],
-    ["aa", chr_map, "AA"],
-    ["abab", chr_map, "ABAB"],
-    ["", chr_map, ""],
-    ["", {}, ""],
-    ["abc", {}, "abc"],
-  ] as [string, Record<string, string>, string][]) {
-    msg = `translates '${string}' to '${result}' with provided charmap`;
-    t.equal(matching.translate(string, map), result, msg);
-  }
-
-  for (const value of [
-    [[0, 1], 0],
-    [[1, 1], 0],
-    [[-1, 1], 0],
-    [[5, 5], 0],
-    [[3, 5], 3],
-    [[-1, 5], 4],
-    [[-5, 5], 0],
-    [[6, 5], 1],
-  ] as [number[], number][]) {
-    const [dividend, divisor] = Array.from(value[0]),
-      remainder = value[1];
-    msg = `mod(${dividend}, ${divisor}) == ${remainder}`;
-    t.equal(matching.mod(dividend, divisor), remainder, msg);
-  }
-
-  t.deepEqual(matching.sorted([]), [], "sorting an empty list leaves it empty");
-  const [m1, m2, m3, m4, m5, m6] = Array.from([
-    { i: 5, j: 5 },
-    { i: 6, j: 7 },
-    { i: 2, j: 5 },
-    { i: 0, j: 0 },
-    { i: 2, j: 3 },
-    { i: 0, j: 3 },
-  ]);
-  msg = "matches are sorted on i index primary, j secondary";
-  t.deepEqual(
-    matching.sorted([m1, m2, m3, m4, m5, m6]),
-    [m4, m6, m5, m3, m1, m2],
-    msg
-  );
-  return t.end();
-});
-
 test("dictionary matching", function (t) {
   let rank: unknown;
   const dm = (pw: string) => matching.dictionary_match(pw, test_dicts);
