@@ -19,13 +19,13 @@ const zxcvbn = function (password: string, user_inputs: string[]) {
   const start = time();
   // reset the user inputs matcher on a per-request basis to keep things stateless
   const sanitized_inputs: string[] = [];
-  for (let arg of Array.from(user_inputs)) {
+  for (const arg of Array.from(user_inputs)) {
     if (["string", "number", "boolean"].includes(typeof arg)) {
       sanitized_inputs.push(arg.toString().toLowerCase());
     }
   }
   matching.set_user_input_dictionary(sanitized_inputs);
-  
+
   const matches = matching.omnimatch(password);
   const result = scoring.most_guessable_match_sequence(password, matches);
   const calc_time = time() - start;

@@ -6,17 +6,34 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+
+interface ICrackTimes {
+  online_throttling_100_per_hour: number;
+  online_no_throttling_10_per_second: number;
+  offline_slow_hashing_1e4_per_second: number;
+  offline_fast_hashing_1e10_per_second: number;
+  [index: string]: number;
+}
+
+type ICrackTimesDisplay = { [P in keyof ICrackTimes]?: string };
+
+interface IAttackTimes {
+  crack_times_seconds: ICrackTimes;
+  crack_times_display: ICrackTimesDisplay;
+  score: number;
+}
+
 const time_estimates = {
-  estimate_attack_times(guesses: number) {
-    const crack_times_seconds: { [index: string]: number } = {
+  estimate_attack_times(guesses: number): IAttackTimes {
+    const crack_times_seconds: ICrackTimes = {
       online_throttling_100_per_hour: guesses / (100 / 3600),
       online_no_throttling_10_per_second: guesses / 10,
       offline_slow_hashing_1e4_per_second: guesses / 1e4,
       offline_fast_hashing_1e10_per_second: guesses / 1e10,
     };
 
-    const crack_times_display: { [index: string]: string | null } = {};
-    for (let scenario in crack_times_seconds) {
+    const crack_times_display: ICrackTimesDisplay = {};
+    for (const scenario in crack_times_seconds) {
       const seconds = crack_times_seconds[scenario];
       crack_times_display[scenario] = this.display_time(seconds);
     }
@@ -28,7 +45,7 @@ const time_estimates = {
     };
   },
 
-  guesses_to_score(guesses: number) {
+  guesses_to_score(guesses: number): 0 | 1 | 2 | 3 | 4 {
     const DELTA = 5;
     if (guesses < 1e3 + DELTA) {
       // risky password: "too guessable"
@@ -49,14 +66,14 @@ const time_estimates = {
     }
   },
 
-  display_time(seconds: number) {
+  display_time(seconds: number): string {
     const minute = 60;
     const hour = minute * 60;
     const day = hour * 24;
     const month = day * 31;
     const year = month * 12;
     const century = year * 100;
-    let [display_num, display_str] = Array.from(
+    const [display_num, display_str] = Array.from(
       ((): [number | null, string] => {
         let base;
         if (seconds < 1) {
@@ -85,7 +102,7 @@ const time_estimates = {
       })()
     ) as [number | null, string];
     if (display_num != null && display_num !== 1) {
-      display_str += "s";
+      return display_str + "s";
     }
     return display_str;
   },

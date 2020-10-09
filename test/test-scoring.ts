@@ -266,7 +266,7 @@ test("calc_guesses", function (t) {
 });
 
 test("repeat guesses", function (t) {
-  for (let [token, base_token, repeat_count] of [
+  for (const [token, base_token, repeat_count] of [
     ["aa", "a", 2],
     ["999", "9", 3],
     ["$$$$", "$", 4],
@@ -295,7 +295,7 @@ test("repeat guesses", function (t) {
 });
 
 test("sequence guesses", function (t) {
-  for (let [token, ascending, guesses] of [
+  for (const [token, ascending, guesses] of [
     ["ab", true, 4 * 2], // obvious start * len-2
     ["XYZ", true, 26 * 3], // base26 * len-3
     ["4567", true, 10 * 4], // base10 * len-4
@@ -561,7 +561,7 @@ test("dictionary_guesses", function (t) {
 });
 
 test("uppercase variants", function (t) {
-  for (let [word, variants] of [
+  for (const [word, variants] of [
     ["", 1],
     ["a", 1],
     ["A", 2],

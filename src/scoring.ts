@@ -2,15 +2,12 @@ import {
   IAnyMatch,
   IBruteForceMatch,
   IDateMatch,
-  IDictionaryList,
   IDictionaryMatch,
-  IMatch,
   INullableStringTable,
   IRegexMatch,
   IRepeatMatch,
   ISequenceMatch,
   ISpatialMatch,
-  IStringTable,
 } from "./matching";
 import adjacency_graphs from "./adjacency_graphs";
 
@@ -23,20 +20,19 @@ import adjacency_graphs from "./adjacency_graphs";
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let k, v;
+let k;
 
 // on qwerty, 'g' has degree 6, being adjacent to 'ftyhbv'. '\' has degree 1.
 // this calculates the average over all keys.
 const calc_average_degree = function (graph: INullableStringTable) {
   let average = 0;
-  for (let key in graph) {
+  for (const key in graph) {
     const neighbors = graph[key];
     average += Array.from(neighbors).filter((n) => n).length;
   }
   average /= (() => {
     const result: string[] = [];
     for (k in graph) {
-      v = graph[k];
       result.push(k);
     }
     return result;
@@ -50,7 +46,7 @@ const MIN_SUBMATCH_GUESSES_SINGLE_CHAR = 10;
 const MIN_SUBMATCH_GUESSES_MULTI_CHAR = 50;
 
 const scoring = {
-  nCk(n: number, k: number) {
+  nCk(n: number, k: number): number {
     // http://blog.plover.com/math/choose.html
     if (k > n) {
       return 0;
@@ -71,14 +67,14 @@ const scoring = {
     return r;
   },
 
-  log10(n: number) {
+  log10(n: number): number {
     return Math.log(n) / Math.log(10);
   }, // IE doesn't support Math.log10 :(
-  log2(n: number) {
+  log2(n: number): number {
     return Math.log(n) / Math.log(2);
   },
 
-  factorial(n: number) {
+  factorial(n: number): number {
     // unoptimized, called only on small n
     if (n < 2) {
       return 1;
@@ -163,7 +159,7 @@ const scoring = {
       matches_by_j[m.j].push(m);
     }
     // small detail: for deterministic output, sort each sublist by i.
-    for (let lst of Array.from(matches_by_j)) {
+    for (const lst of Array.from(matches_by_j)) {
       lst.sort((m1, m2) => m1.i - m2.i);
     }
 
@@ -234,7 +230,7 @@ const scoring = {
       // update state if new best.
       // first see if any competing sequences covering this prefix, with l or fewer matches,
       // fare better than this sequence. if so, skip it and return.
-      for (let competing_l in optimal.g[k]) {
+      for (const competing_l in optimal.g[k]) {
         const competing_g = optimal.g[k][competing_l];
         if (((competing_l as unknown) as number) > l) {
           continue;
@@ -257,7 +253,7 @@ const scoring = {
       return (() => {
         const result4: (number | undefined)[][] = [];
         for (
-          var i = 1, end4 = k, asc4 = 1 <= end4;
+          let i = 1, end4 = k, asc4 = 1 <= end4;
           asc4 ? i <= end4 : i >= end4;
           asc4 ? i++ : i--
         ) {
@@ -269,7 +265,7 @@ const scoring = {
             (() => {
               const result5: (number | undefined)[] = [];
               const object = optimal.m[i - 1];
-              for (let l in object) {
+              for (const l in object) {
                 const last_m = object[l];
                 const i = parseInt(l);
                 // corner: an optimal sequence will never have two adjacent bruteforce matches.
@@ -291,7 +287,7 @@ const scoring = {
     };
 
     // helper: make bruteforce match objects spanning i to j, inclusive.
-    var make_bruteforce_match = (i: number, j: number): IBruteForceMatch => {
+    const make_bruteforce_match = (i: number, j: number): IBruteForceMatch => {
       return {
         pattern: "bruteforce",
         token: password.slice(i, +j + 1 || undefined),
@@ -303,12 +299,12 @@ const scoring = {
     // helper: step backwards through optimal.m starting at the end,
     // constructing the final optimal match sequence.
     const unwind = (n: number) => {
-      const optimal_match_sequence: any[] = [];
+      const optimal_match_sequence: IAnyMatch[] = [];
       let k = n - 1;
       // find the final best sequence length and score
       let l = -1;
       let g = Infinity;
-      for (let candidate_l in optimal.g[k]) {
+      for (const candidate_l in optimal.g[k]) {
         const candidate_g = optimal.g[k][candidate_l];
         if (candidate_g < g) {
           l = parseInt(candidate_l);
@@ -332,7 +328,7 @@ const scoring = {
     ) {
       for (m of Array.from(matches_by_j[k])) {
         if (m.i > 0) {
-          for (let l in optimal.m[m.i - 1]) {
+          for (const l in optimal.m[m.i - 1]) {
             const len = parseInt(l);
             update(m, len + 1);
           }
@@ -366,7 +362,7 @@ const scoring = {
   // guess estimation -- one function per match pattern ---------------------------
   // ------------------------------------------------------------------------------
 
-  estimate_guesses(match: IAnyMatch, password: string) {
+  estimate_guesses(match: IAnyMatch, password: string): number {
     if (match.guesses != null) {
       return match.guesses;
     } // a match's guess estimate doesn't change. cache it.
@@ -377,15 +373,6 @@ const scoring = {
           ? MIN_SUBMATCH_GUESSES_SINGLE_CHAR
           : MIN_SUBMATCH_GUESSES_MULTI_CHAR;
     }
-    const estimation_functions = {
-      bruteforce: this.bruteforce_guesses,
-      dictionary: this.dictionary_guesses,
-      spatial: this.spatial_guesses,
-      repeat: this.repeat_guesses,
-      sequence: this.sequence_guesses,
-      regex: this.regex_guesses,
-      date: this.date_guesses,
-    };
 
     let guesses: number;
 
@@ -418,7 +405,7 @@ const scoring = {
     return match.guesses;
   },
 
-  bruteforce_guesses(match: IAnyMatch) {
+  bruteforce_guesses(match: IAnyMatch): number {
     let guesses = Math.pow(BRUTEFORCE_CARDINALITY, match.token.length);
     if (guesses === Number.POSITIVE_INFINITY) {
       guesses = Number.MAX_VALUE;
@@ -432,11 +419,11 @@ const scoring = {
     return Math.max(guesses, min_guesses);
   },
 
-  repeat_guesses(match: IRepeatMatch) {
+  repeat_guesses(match: IRepeatMatch): number {
     return match.base_guesses * match.repeat_count;
   },
 
-  sequence_guesses(match: ISequenceMatch) {
+  sequence_guesses(match: ISequenceMatch): number {
     let base_guesses;
     const first_chr = match.token.charAt(0);
     // lower guesses for obvious starting points
@@ -462,7 +449,7 @@ const scoring = {
   MIN_YEAR_SPACE: 20,
   REFERENCE_YEAR: new Date().getFullYear(),
 
-  regex_guesses(match: IRegexMatch) {
+  regex_guesses(match: IRegexMatch): number {
     const char_class_bases: { [index: string]: number } = {
       alpha_lower: 26,
       alpha_upper: 26,
@@ -474,11 +461,12 @@ const scoring = {
     if (match.regex_name in char_class_bases) {
       return Math.pow(char_class_bases[match.regex_name], match.token.length);
     } else {
+      let year_space: number;
       switch (match.regex_name) {
         case "recent_year":
           // conservative estimate of year space: num years from REFERENCE_YEAR.
           // if year is close to REFERENCE_YEAR, estimate a year space of MIN_YEAR_SPACE.
-          var year_space = Math.abs(
+          year_space = Math.abs(
             parseInt(match.regex_match[0]) - this.REFERENCE_YEAR
           );
           year_space = Math.max(year_space, this.MIN_YEAR_SPACE);
@@ -488,7 +476,7 @@ const scoring = {
     return 0;
   },
 
-  date_guesses(match: IDateMatch) {
+  date_guesses(match: IDateMatch): number {
     // base guesses: (year distance from REFERENCE_YEAR) * num_days * num_years
     const year_space = Math.max(
       Math.abs(match.year - this.REFERENCE_YEAR),
@@ -509,7 +497,6 @@ const scoring = {
   KEYBOARD_STARTING_POSITIONS: (() => {
     const result: string[] = [];
     for (k in adjacency_graphs.qwerty) {
-      v = adjacency_graphs.qwerty[k];
       result.push(k);
     }
     return result;
@@ -517,13 +504,12 @@ const scoring = {
   KEYPAD_STARTING_POSITIONS: (() => {
     const result1: string[] = [];
     for (k in adjacency_graphs.keypad) {
-      v = adjacency_graphs.keypad[k];
       result1.push(k);
     }
     return result1;
   })().length,
 
-  spatial_guesses(match: ISpatialMatch) {
+  spatial_guesses(match: ISpatialMatch): number {
     let d, i, s;
     let asc, end;
     if (["qwerty", "dvorak"].includes(match.graph)) {
@@ -574,7 +560,7 @@ const scoring = {
     return guesses;
   },
 
-  dictionary_guesses(match: IDictionaryMatch) {
+  dictionary_guesses(match: IDictionaryMatch): number {
     match.base_guesses = match.rank; // keep these as properties for display purposes
     match.uppercase_variations = this.uppercase_variations(match);
     match.l33t_variations = this.l33t_variations(match);
@@ -592,7 +578,7 @@ const scoring = {
   ALL_UPPER: /^[^a-z]+$/,
   ALL_LOWER: /^[^A-Z]+$/,
 
-  uppercase_variations(match: { token: string }) {
+  uppercase_variations(match: { token: string }): number {
     let chr;
     const word = match.token;
     if (word.match(this.ALL_LOWER) || word.toLowerCase() === word) {
@@ -601,7 +587,7 @@ const scoring = {
     // a capitalized word is the most common capitalization scheme,
     // so it only doubles the search space (uncapitalized + capitalized).
     // allcaps and end-capitalized are common enough too, underestimate as 2x factor to be safe.
-    for (let regex of [this.START_UPPER, this.END_UPPER, this.ALL_UPPER]) {
+    for (const regex of [this.START_UPPER, this.END_UPPER, this.ALL_UPPER]) {
       if (word.match(regex)) {
         return 2;
       }
@@ -638,16 +624,16 @@ const scoring = {
     return variations;
   },
 
-  l33t_variations(match: IDictionaryMatch) {
+  l33t_variations(match: IDictionaryMatch): number {
     let chr;
     if (!match.l33t) {
       return 1;
     }
     let variations = 1;
-    for (var subbed in match.sub) {
+    for (const subbed in match.sub) {
       // lower-case match.token before calculating: capitalization shouldn't affect l33t calc.
-      var unsubbed = match.sub[subbed];
-      var chrs = match.token.toLowerCase().split("");
+      const unsubbed = match.sub[subbed];
+      const chrs = match.token.toLowerCase().split("");
       const S = (() => {
         const result2: string[] = [];
         for (chr of Array.from(chrs)) {

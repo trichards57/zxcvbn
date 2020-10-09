@@ -10,13 +10,9 @@
 import test from "tape";
 import matching, {
   IAnyMatch,
-  IDictionary,
   IDictionaryList,
-  IDictionaryMatch,
-  INullableStringTable,
   INullableStringTableTable,
   IStringTable,
-  ISubstitution,
 } from "../src/matching";
 import adjacency_graphs from "../src/adjacency_graphs";
 
@@ -31,14 +27,14 @@ const genpws = function (
 ) {
   prefixes = prefixes.slice();
   suffixes = suffixes.slice();
-  for (let lst of [prefixes, suffixes]) {
+  for (const lst of [prefixes, suffixes]) {
     if (!Array.from(lst).includes("")) {
       lst.unshift("");
     }
   }
   const result: [string, number, number][] = [];
-  for (let prefix of Array.from(prefixes)) {
-    for (let suffix of Array.from(suffixes)) {
+  for (const prefix of Array.from(prefixes)) {
+    for (const suffix of Array.from(suffixes)) {
       const [i, j] = Array.from([
         prefix.length,
         prefix.length + pattern.length - 1,
@@ -56,7 +52,7 @@ const check_matches = function (
   pattern_names: string[] | string,
   patterns: string[],
   ijs: number[][],
-  props: { [index: string]: any[] }
+  props: { [index: string]: unknown[] }
 ) {
   let i;
   if (typeof pattern_names === "string") {
@@ -78,7 +74,7 @@ const check_matches = function (
 
   let is_equal_len_args =
     pattern_names.length === patterns.length && patterns.length === ijs.length;
-  for (let prop in props) {
+  for (const prop in props) {
     // props is structured as: keys that points to list of values
     const lst = props[prop];
     is_equal_len_args = is_equal_len_args && lst.length === patterns.length;
@@ -92,12 +88,12 @@ const check_matches = function (
   return (() => {
     const result1: boolean[][] = [];
     for (
-      var k = 0, end1 = patterns.length, asc1 = 0 <= end1;
+      let k = 0, end1 = patterns.length, asc1 = 0 <= end1;
       asc1 ? k < end1 : k > end1;
       asc1 ? k++ : k--
     ) {
       let j;
-      var match = matches[k];
+      const match = matches[k];
       const pattern_name = pattern_names[k];
       const pattern = patterns[k];
       [i, j] = Array.from(ijs[k]);
@@ -110,7 +106,7 @@ const check_matches = function (
       result1.push(
         (() => {
           const result2: boolean[] = [];
-          for (let prop_name in props) {
+          for (const prop_name in props) {
             const prop_list = props[prop_name];
             let prop_msg = prop_list[k];
             if (typeof prop_msg === "string") {
@@ -128,10 +124,10 @@ const check_matches = function (
 };
 
 test("matching utils", function (t) {
-  let msg;
+  let msg: string;
   t.ok(matching.empty([]), ".empty returns true for an empty array");
   t.ok(matching.empty({}), ".empty returns true for an empty object");
-  for (let obj of [[1], [1, 2], [[]], { a: 1 }, { 0: {} }]) {
+  for (const obj of [[1], [1, 2], [[]], { a: 1 }, { 0: {} }]) {
     t.notOk(
       matching.empty(obj),
       ".empty returns false for non-empty objects and arrays"
@@ -139,7 +135,7 @@ test("matching utils", function (t) {
   }
 
   const chr_map = { a: "A", b: "B" };
-  for (let [string, map, result] of [
+  for (const [string, map, result] of [
     ["a", chr_map, "A"],
     ["c", chr_map, "c"],
     ["ab", chr_map, "AB"],
@@ -149,12 +145,12 @@ test("matching utils", function (t) {
     ["", chr_map, ""],
     ["", {}, ""],
     ["abc", {}, "abc"],
-  ] as [string, {}, string][]) {
+  ] as [string, Record<string, string>, string][]) {
     msg = `translates '${string}' to '${result}' with provided charmap`;
     t.equal(matching.translate(string, map), result, msg);
   }
 
-  for (let value of [
+  for (const value of [
     [[0, 1], 0],
     [[1, 1], 0],
     [[-1, 1], 0],
@@ -189,9 +185,9 @@ test("matching utils", function (t) {
 });
 
 test("dictionary matching", function (t) {
-  let rank;
+  let rank: unknown;
   const dm = (pw: string) => matching.dictionary_match(pw, test_dicts);
-  var test_dicts: IDictionaryList = {
+  const test_dicts: IDictionaryList = {
     d1: {
       motherboard: 1,
       mother: 2,
@@ -272,7 +268,7 @@ test("dictionary matching", function (t) {
   const prefixes = ["q", "%%"];
   const suffixes = ["%", "qq"];
   let word = "asdf1234&*";
-  for (let [password, i, j] of Array.from(genpws(word, prefixes, suffixes))) {
+  for (const [password, i, j] of Array.from(genpws(word, prefixes, suffixes))) {
     matches = dm(password);
     msg = "identifies words surrounded by non-words";
     check_matches(msg, t, matches, "dictionary", [word], [[i, j]], {
@@ -282,7 +278,7 @@ test("dictionary matching", function (t) {
     });
   }
 
-  for (let name in test_dicts) {
+  for (const name in test_dicts) {
     const dict = test_dicts[name];
     for (word in dict) {
       rank = dict[word];
@@ -382,7 +378,7 @@ test("l33t matching", function (t) {
     o: ["0"],
   };
 
-  for (let [pw, expected] of [
+  for (const [pw, expected] of [
     ["", {}],
     ["abcdefgo123578!#$&*)]}>", {}],
     ["a", {}],
@@ -399,7 +395,7 @@ test("l33t matching", function (t) {
     );
   }
 
-  for (let [table, subs] of [
+  for (const [table, subs] of [
     [{}, [{}]],
     [{ a: ["@"] }, [{ "@": "a" }]],
     [{ a: ["@", "4"] }, [{ "@": "a" }, { "4": "a" }]],
@@ -417,7 +413,7 @@ test("l33t matching", function (t) {
   }
 
   const lm = (pw: string) => matching.l33t_match(pw, dicts, test_table);
-  var dicts = {
+  const dicts = {
     words: {
       aac: 1,
       password: 3,
@@ -512,9 +508,8 @@ test("l33t matching", function (t) {
 });
 
 test("spatial matching", function (t) {
-  let msg;
-  let keyboard, shifts, turns;
-  for (let password of ["", "/", "qw", "*/"]) {
+  let msg: string;
+  for (const password of ["", "/", "qw", "*/"]) {
     msg = "doesn't match 1- and 2-character spatial patterns";
     t.deepEqual(matching.spatial_match(password), [], msg);
   }
@@ -523,7 +518,7 @@ test("spatial matching", function (t) {
   let _graphs: INullableStringTableTable = {
     qwerty: adjacency_graphs.qwerty,
   };
-  let pattern = "6tfGHJ";
+  const pattern = "6tfGHJ";
   let matches = matching.spatial_match(`rz!${pattern}%z`, _graphs);
   msg = "matches against spatial patterns surrounded by non-spatial patterns";
   check_matches(
@@ -540,7 +535,7 @@ test("spatial matching", function (t) {
     }
   );
 
-  for ([pattern, keyboard, turns, shifts] of [
+  for (const [pattern, keyboard, turns, shifts] of [
     ["12345", "qwerty", 1, 0],
     ["@WSX", "qwerty", 1, 4],
     ["6tfGHJ", "qwerty", 2, 3],
@@ -579,16 +574,13 @@ test("spatial matching", function (t) {
 });
 
 test("sequence matching", function (t) {
-  let msg, password;
-  let i, j;
-  let is_ascending, name;
-  for (password of ["", "a", "1"]) {
-    msg = `doesn't match length-${password.length} sequences`;
+  for (const password of ["", "a", "1"]) {
+    const msg = `doesn't match length-${password.length} sequences`;
     t.deepEqual(matching.sequence_match(password), [], msg);
   }
 
   let matches = matching.sequence_match("abcbabc");
-  msg = "matches overlapping patterns";
+  const msg = "matches overlapping patterns";
   check_matches(
     msg,
     t,
@@ -605,17 +597,19 @@ test("sequence matching", function (t) {
 
   const prefixes = ["!", "22"];
   const suffixes = ["!", "22"];
-  let pattern = "jihg";
-  for ([password, i, j] of Array.from(genpws(pattern, prefixes, suffixes))) {
+  const pattern = "jihg";
+  for (const [password, i, j] of Array.from(
+    genpws(pattern, prefixes, suffixes)
+  )) {
     matches = matching.sequence_match(password);
-    msg = `matches embedded sequence patterns ${password}`;
+    const msg = `matches embedded sequence patterns ${password}`;
     check_matches(msg, t, matches, "sequence", [pattern], [[i, j]], {
       sequence_name: ["lower"],
       ascending: [false],
     });
   }
 
-  for ([pattern, name, is_ascending] of [
+  for (const [pattern, name, is_ascending] of [
     ["ABC", "upper", true],
     ["CBA", "upper", false],
     ["PQR", "upper", true],
@@ -631,7 +625,7 @@ test("sequence matching", function (t) {
     ["97531", "digits", false],
   ] as [string, string, boolean][]) {
     matches = matching.sequence_match(pattern);
-    msg = `matches '${pattern}' as a '${name}' sequence`;
+    const msg = `matches '${pattern}' as a '${name}' sequence`;
     check_matches(
       msg,
       t,
@@ -649,9 +643,8 @@ test("sequence matching", function (t) {
 });
 
 test("repeat matching", function (t) {
-  let length, matches, msg, password;
-  let i, j;
-  for (password of ["", "#"]) {
+  let matches, msg;
+  for (const password of ["", "#"]) {
     msg = `doesn't match length-${password.length} repeat patterns`;
     t.deepEqual(matching.repeat_match(password), [], msg);
   }
@@ -660,7 +653,9 @@ test("repeat matching", function (t) {
   const prefixes = ["@", "y4@"];
   const suffixes = ["u", "u%7"];
   let pattern = "&&&&&";
-  for ([password, i, j] of Array.from(genpws(pattern, prefixes, suffixes))) {
+  for (const [password, i, j] of Array.from(
+    genpws(pattern, prefixes, suffixes)
+  )) {
     matches = matching.repeat_match(password);
     msg = "matches embedded repeat patterns";
     check_matches(msg, t, matches, "repeat", [pattern], [[i, j]], {
@@ -668,8 +663,8 @@ test("repeat matching", function (t) {
     });
   }
 
-  for (length of [3, 12]) {
-    for (let chr of ["a", "Z", "4", "&"]) {
+  for (const length of [3, 12]) {
+    for (const chr of ["a", "Z", "4", "&"]) {
       pattern = Array(length + 1).join(chr);
       matches = matching.repeat_match(pattern);
       msg = `matches repeats with base character '${chr}'`;
@@ -763,7 +758,7 @@ test("repeat matching", function (t) {
 });
 
 test("regex matching", function (t) {
-  for (let [pattern, name] of [
+  for (const [pattern, name] of [
     ["1922", "recent_year"],
     ["2017", "recent_year"],
   ]) {
@@ -785,7 +780,7 @@ test("regex matching", function (t) {
 test("date matching", function (t) {
   let day, matches, month, msg, password, year;
   let i, j;
-  for (let sep of ["", " ", "-", "/", "\\", "_", "."]) {
+  for (const sep of ["", " ", "-", "/", "\\", "_", "."]) {
     password = `13${sep}2${sep}1921`;
     matches = matching.date_match(password);
     msg = `matches dates that use '${sep}' as a separator`;
@@ -805,7 +800,7 @@ test("date matching", function (t) {
     );
   }
 
-  for (let order of ["mdy", "dmy", "ymd", "ydm"]) {
+  for (const order of ["mdy", "dmy", "ymd", "ydm"]) {
     const [d, m, y] = Array.from([8, 8, 88]);
     password = order
       .replace("y", y.toString())
@@ -951,7 +946,7 @@ test("omnimatch", function (t) {
   t.deepEquals(matching.omnimatch(""), [], "doesn't match ''");
   const password = "r0sebudmaelstrom11/20/91aaaa";
   const matches = matching.omnimatch(password);
-  for (let value of [
+  for (const value of [
     ["dictionary", [0, 6]],
     ["dictionary", [7, 15]],
     ["date", [16, 23]],
@@ -960,7 +955,7 @@ test("omnimatch", function (t) {
     const pattern_name = value[0],
       [i, j] = Array.from(value[1]);
     let included = false;
-    for (let match of Array.from(matches)) {
+    for (const match of Array.from(matches)) {
       if (match.i === i && match.j === j && match.pattern === pattern_name) {
         included = true;
       }

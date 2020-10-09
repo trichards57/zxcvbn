@@ -29,7 +29,12 @@ interface IRegexList {
   [index: string]: RegExp;
 }
 
-interface IDMY {
+interface IDM {
+  day: number;
+  month: number;
+}
+
+interface IDMY extends IDM {
   day: number;
   month: number;
   year: number;
@@ -68,7 +73,7 @@ export interface IMatch extends ISortable {
     | "bruteforce";
   guesses?: number;
   guesses_log10?: number;
-  [index: string]: any;
+  [index: string]: unknown;
 }
 
 export interface IRepeatMatch extends IMatch {
@@ -142,7 +147,7 @@ export { IAnyMatch };
 const build_ranked_dict = function (ordered_list: string[]) {
   const result: IDictionary = {};
   let i = 1; // rank starts at 1, not 0
-  for (let word of Array.from(ordered_list)) {
+  for (const word of Array.from(ordered_list)) {
     result[word] = i;
     i += 1;
   }
@@ -211,19 +216,19 @@ const DATE_SPLITS: {
 };
 
 const matching = {
-  empty(obj: {}) {
+  empty(obj: Record<string, unknown> | unknown[]): boolean {
     return Object.keys(obj).length === 0;
   },
-  translate(string: string, chr_map: ISubstitution) {
+  translate(string: string, chr_map: ISubstitution): string {
     return string
       .split("")
       .map((chr: string) => chr_map[chr] || chr)
       .join("");
   },
-  mod(n: number, m: number) {
+  mod(n: number, m: number): number {
     return ((n % m) + m) % m;
   }, // mod impl that works for negative numbers
-  sorted<T extends ISortable>(matches: T[]) {
+  sorted<T extends ISortable>(matches: T[]): T[] {
     // sort on i primary, j secondary
     return matches.sort((m1, m2) => m1.i - m2.i || m1.j - m2.j);
   },
@@ -244,7 +249,7 @@ const matching = {
       this.regex_match,
       this.date_match,
     ];
-    for (let matcher of Array.from(matchers)) {
+    for (const matcher of Array.from(matchers)) {
       matches = [...matches, ...matcher.call(this, password)];
     }
     return this.sorted(matches);
@@ -265,7 +270,7 @@ const matching = {
     const matches: IDictionaryMatch[] = [];
     const len = password.length;
     const password_lower = password.toLowerCase();
-    for (let dictionary_name in _ranked_dictionaries) {
+    for (const dictionary_name in _ranked_dictionaries) {
       const ranked_dict = _ranked_dictionaries[dictionary_name];
       for (
         let i = 0, end = len, asc = 0 <= end;
@@ -301,7 +306,7 @@ const matching = {
   reverse_dictionary_match(
     password: string,
     _ranked_dictionaries?: IDictionaryList | undefined
-  ) {
+  ): IDictionaryMatch[] {
     if (_ranked_dictionaries == null) {
       _ranked_dictionaries = RANKED_DICTIONARIES;
     }
@@ -310,7 +315,7 @@ const matching = {
       reversed_password,
       _ranked_dictionaries
     );
-    for (let match of Array.from(matches)) {
+    for (const match of Array.from(matches)) {
       match.token = match.token.split("").reverse().join(""); // reverse back
       match.reversed = true;
       // map coordinates back to original string
@@ -322,7 +327,7 @@ const matching = {
     return this.sorted(matches);
   },
 
-  set_user_input_dictionary(ordered_list: string[]) {
+  set_user_input_dictionary(ordered_list: string[]): IDictionary {
     return (RANKED_DICTIONARIES["user_inputs"] = build_ranked_dict(
       ordered_list.slice()
     ));
@@ -333,13 +338,13 @@ const matching = {
   //-------------------------------------------------------------------------------
 
   // makes a pruned copy of l33t_table that only includes password's possible substitutions
-  relevant_l33t_subtable(password: string, table: IStringTable) {
+  relevant_l33t_subtable(password: string, table: IStringTable): IStringTable {
     const password_chars: { [index: string]: boolean } = {};
-    for (let chr of Array.from(password.split(""))) {
+    for (const chr of Array.from(password.split(""))) {
       password_chars[chr] = true;
     }
     const subtable: IStringTable = {};
-    for (let letter in table) {
+    for (const letter in table) {
       const subs = table[letter];
       const relevant_subs = Array.from(subs).filter(
         (sub) => sub != null && sub in password_chars
@@ -360,17 +365,16 @@ const matching = {
       }
       return result;
     })();
-    let subs: any[][] = [[]];
+    let subs: [string, string][][] = [[]];
 
-    const dedup = function (subs: any[]) {
-      let v, k;
-      const deduped: any[] = [];
+    const dedup = function (subs: [string, string][][]) {
+      const deduped: [string, string][][] = [];
       const members: IBoolTable = {};
-      for (var sub of Array.from(subs)) {
-        var assoc = (() => {
-          const result1: [string, number][] = [];
-          for (v = 0; v < sub.length; v++) {
-            k = sub[v];
+      for (const sub of Array.from(subs)) {
+        const assoc = (() => {
+          const result1: [[string, string], number][] = [];
+          for (let v = 0; v < sub.length; v++) {
+            const k = sub[v];
             result1.push([k, v]);
           }
           return result1;
@@ -378,8 +382,8 @@ const matching = {
         assoc.sort();
         const label = (() => {
           const result2: string[] = [];
-          for (v = 0; v < assoc.length; v++) {
-            k = assoc[v];
+          for (let v = 0; v < assoc.length; v++) {
+            const k = assoc[v];
             result2.push(k + "," + v);
           }
           return result2;
@@ -392,15 +396,15 @@ const matching = {
       return deduped;
     };
 
-    var helper = function (keys: string[]): void {
+    const helper = function (keys: string[]): void {
       if (!keys.length) {
         return;
       }
       const first_key = keys[0];
       const rest_keys = keys.slice(1);
-      const next_subs: any[] = [];
-      for (let l33t_chr of Array.from(table[first_key])) {
-        for (let sub of Array.from(subs)) {
+      const next_subs: [string, string][][] = [];
+      for (const l33t_chr of Array.from(table[first_key])) {
+        for (const sub of Array.from(subs)) {
           let dup_l33t_index = -1;
           for (
             let i = 0, end = sub.length, asc = 0 <= end;
@@ -430,9 +434,9 @@ const matching = {
 
     helper(keys);
     const sub_dicts: ISubstitution[] = []; // convert from assoc lists to dicts
-    for (let sub of Array.from(subs)) {
+    for (const sub of Array.from(subs)) {
       const sub_dict: ISubstitution = {};
-      for (let [l33t_chr, chr] of Array.from(sub)) {
+      for (const [l33t_chr, chr] of Array.from(sub)) {
         sub_dict[l33t_chr] = chr;
       }
       sub_dicts.push(sub_dict);
@@ -444,7 +448,7 @@ const matching = {
     password: string,
     _ranked_dictionaries: IDictionaryList | undefined = undefined,
     _l33t_table: IStringTable | undefined = undefined
-  ) {
+  ): IDictionaryMatch[] {
     let token;
     if (_ranked_dictionaries == undefined) {
       _ranked_dictionaries = RANKED_DICTIONARIES;
@@ -453,7 +457,7 @@ const matching = {
       _l33t_table = L33T_TABLE;
     }
     const matches: IDictionaryMatch[] = [];
-    for (let sub of Array.from(
+    for (const sub of Array.from(
       this.enumerate_l33t_subs(
         this.relevant_l33t_subtable(password, _l33t_table)
       )
@@ -462,15 +466,15 @@ const matching = {
         break;
       } // corner case: password has no relevant subs.
       const subbed_password = this.translate(password, sub);
-      for (let match of Array.from(
+      for (const match of Array.from(
         this.dictionary_match(subbed_password, _ranked_dictionaries)
       )) {
         token = password.slice(match.i, +match.j + 1 || undefined);
         if (token.toLowerCase() === match.matched_word) {
           continue; // only return the matches that contain an actual substitution
         }
-        var match_sub: ISubstitution = {}; // subset of mappings in sub that are in use for this match
-        for (let subbed_chr in sub) {
+        const match_sub: ISubstitution = {}; // subset of mappings in sub that are in use for this match
+        for (const subbed_chr in sub) {
           const chr = sub[subbed_chr];
           if (token.indexOf(subbed_chr) !== -1) {
             match_sub[subbed_chr] = chr;
@@ -481,7 +485,7 @@ const matching = {
         match.sub = match_sub;
         match.sub_display = (() => {
           const result: string[] = [];
-          for (let k in match_sub) {
+          for (const k in match_sub) {
             const v = match_sub[k];
             result.push(`${k} -> ${v}`);
           }
@@ -506,12 +510,15 @@ const matching = {
   // spatial match (qwerty/dvorak/keypad) -----------------------------------------
   // ------------------------------------------------------------------------------
 
-  spatial_match(password: string, _graphs?: INullableStringTableTable) {
+  spatial_match(
+    password: string,
+    _graphs?: INullableStringTableTable
+  ): ISpatialMatch[] {
     if (_graphs == undefined) {
       _graphs = GRAPHS;
     }
     const matches: ISpatialMatch[] = [];
-    for (let graph_name in _graphs) {
+    for (const graph_name in _graphs) {
       const graph = _graphs[graph_name];
       for (const m of this.spatial_match_helper(password, graph, graph_name))
         matches.push(m);
@@ -524,11 +531,11 @@ const matching = {
     password: string,
     graph: INullableStringTable,
     graph_name: string
-  ) {
+  ): ISpatialMatch[] {
     const matches: ISpatialMatch[] = [];
     let i = 0;
     while (i < password.length - 1) {
-      var shifted_count: number;
+      let shifted_count: number;
       let j = i + 1;
       let last_direction: number | null = null;
       let turns = 0;
@@ -541,7 +548,7 @@ const matching = {
       } else {
         shifted_count = 0;
       }
-      while (true) {
+      for (;;) {
         const prev_char = password.charAt(j - 1);
         let found = false;
         let found_direction = -1;
@@ -550,7 +557,7 @@ const matching = {
         // consider growing pattern by one character if j hasn't gone over the edge.
         if (j < password.length) {
           const cur_char = password.charAt(j);
-          for (let adj of Array.from(adjacents)) {
+          for (const adj of Array.from(adjacents)) {
             cur_direction += 1;
             if (adj && adj.indexOf(cur_char) !== -1) {
               found = true;
@@ -602,21 +609,22 @@ const matching = {
   // repeats (aaa, abcabcabc) and sequences (abcdef) ------------------------------
   //-------------------------------------------------------------------------------
 
-  repeat_match(password: string) {
+  repeat_match(password: string): IRepeatMatch[] {
     const matches: IRepeatMatch[] = [];
     const greedy = /(.+)\1+/g;
     const lazy = /(.+?)\1+/g;
     const lazy_anchored = /^(.+?)\1+$/;
     let lastIndex = 0;
     while (lastIndex < password.length) {
-      var base_token, match: RegExpExecArray;
+      let base_token: string;
+      let match: RegExpExecArray;
       greedy.lastIndex = lazy.lastIndex = lastIndex;
       const greedy_match = greedy.exec(password);
       const lazy_match = lazy.exec(password);
-      if (greedy_match == null) {
+      if (greedy_match == null || lazy_match == null) {
         break;
       }
-      if (greedy_match[0].length > lazy_match![0].length) {
+      if (greedy_match[0].length > lazy_match[0].length) {
         // greedy beats lazy for 'aabaab'
         //   greedy: [aabaab, aab]
         //   lazy:   [aa,     a]
@@ -625,12 +633,13 @@ const matching = {
         // aabaab in aabaabaabaab.
         // run an anchored lazy match on greedy's repeated string
         // to find the shortest repeated string
-        base_token = lazy_anchored.exec(match[0])![1];
+        const anchored = lazy_anchored.exec(match[0]);
+        base_token = anchored ? anchored[1] : "";
       } else {
         // lazy beats greedy for 'aaaaa'
         //   greedy: [aaaa,  aa]
         //   lazy:   [aaaaa, a]
-        match = lazy_match!;
+        match = lazy_match;
         base_token = match[1];
       }
       const [i, j] = Array.from([
@@ -660,7 +669,7 @@ const matching = {
   },
 
   MAX_DELTA: 5,
-  sequence_match(password: string) {
+  sequence_match(password: string): ISequenceMatch[] {
     // Identifies sequences by looking for repeated differences in unicode codepoint.
     // this allows skipping, such as 9753, and also matches some extended unicode sequences
     // such as Greek and Cyrillic alphabets.
@@ -712,7 +721,7 @@ const matching = {
       }
     };
 
-    var result: ISequenceMatch[] = [];
+    const result: ISequenceMatch[] = [];
     let i = 0;
     let last_delta: null | number = null;
 
@@ -733,7 +742,7 @@ const matching = {
       i = j;
       last_delta = delta;
     }
-    update(i, password.length - 1, last_delta!);
+    update(i, password.length - 1, last_delta || 0);
     return result;
   },
 
@@ -741,13 +750,16 @@ const matching = {
   // regex matching ---------------------------------------------------------------
   //-------------------------------------------------------------------------------
 
-  regex_match(password: string, _regexen?: IRegexList | undefined) {
+  regex_match(
+    password: string,
+    _regexen?: IRegexList | undefined
+  ): IRegexMatch[] {
     if (_regexen == undefined) {
       _regexen = REGEXEN;
     }
     const matches: IRegexMatch[] = [];
     for (name in _regexen) {
-      var rx_match: RegExpExecArray | null;
+      let rx_match: RegExpExecArray | null;
       const regex = _regexen[name];
       regex.lastIndex = 0; // keeps regex_match stateless
       while ((rx_match = regex.exec(password))) {
@@ -769,7 +781,7 @@ const matching = {
   // date matching ----------------------------------------------------------------
   //-------------------------------------------------------------------------------
 
-  date_match(password: string) {
+  date_match(password: string): IDateMatch[] {
     // a "date" is recognized as:
     //   any 3-tuple that starts or ends with a 2- or 4-digit year,
     //   with 2 or 0 separator chars (1.1.91 or 1191),
@@ -809,7 +821,7 @@ $\
       asc ? i <= end : i >= end;
       asc ? i++ : i--
     ) {
-      var asc1, end1, start;
+      let asc1, end1, start;
       for (
         start = i + 3, j = start, end1 = i + 7, asc1 = start <= end1;
         asc1 ? j <= end1 : j >= end1;
@@ -823,7 +835,7 @@ $\
           continue;
         }
         const candidates: IDMY[] = [];
-        for (let [k, l] of DATE_SPLITS[token.length] as number[][]) {
+        for (const [k, l] of DATE_SPLITS[token.length] as number[][]) {
           dmy = this.map_ints_to_dmy([
             parseInt(token.slice(0, k)),
             parseInt(token.slice(k, l)),
@@ -846,7 +858,7 @@ $\
         const metric = (candidate: IDMY) =>
           Math.abs(candidate.year - scoring.REFERENCE_YEAR);
         let min_distance = metric(candidates[0]);
-        for (let candidate of Array.from(candidates.slice(1))) {
+        for (const candidate of Array.from(candidates.slice(1))) {
           const distance = metric(candidate);
           if (distance < min_distance) {
             [best_candidate, min_distance] = Array.from([
@@ -874,7 +886,7 @@ $\
       asc2 ? i <= end2 : i >= end2;
       asc2 ? i++ : i--
     ) {
-      var asc3, end3, start1;
+      let asc3, end3, start1;
       for (
         start1 = i + 5, j = start1, end3 = i + 9, asc3 = start1 <= end3;
         asc3 ? j <= end3 : j >= end3;
@@ -919,7 +931,7 @@ $\
     return this.sorted(
       matches.filter(function (match) {
         let is_submatch = false;
-        for (let other_match of Array.from(matches)) {
+        for (const other_match of Array.from(matches)) {
           if (match === other_match) {
             continue;
           }
@@ -949,7 +961,7 @@ $\
     let over_12 = 0;
     let over_31 = 0;
     let under_1 = 0;
-    for (let int of Array.from(ints)) {
+    for (const int of Array.from(ints)) {
       if ((99 < int && int < DATE_MIN_YEAR) || int > DATE_MAX_YEAR) {
         return;
       }
@@ -1005,8 +1017,8 @@ $\
     }
   },
 
-  map_ints_to_dm(ints: number[]) {
-    for (let [d, m] of [ints, ints.slice().reverse()]) {
+  map_ints_to_dm(ints: number[]): IDM | undefined {
+    for (const [d, m] of [ints, ints.slice().reverse()]) {
       if (1 <= d && d <= 31 && 1 <= m && m <= 12) {
         return {
           day: d,
@@ -1016,7 +1028,7 @@ $\
     }
   },
 
-  two_to_four_digit_year(year: number) {
+  two_to_four_digit_year(year: number): number {
     if (year > 99) {
       return year;
     } else if (year > 50) {

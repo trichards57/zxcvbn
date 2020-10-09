@@ -14,7 +14,7 @@ interface IFeedbackItem {
   suggestions: string[];
 }
 
-var feedback = {
+const feedback = {
   default_feedback: {
     warning: "",
     suggestions: [
@@ -23,7 +23,7 @@ var feedback = {
     ],
   },
 
-  get_feedback(score: number, sequence: IAnyMatch[]) {
+  get_feedback(score: number, sequence: IAnyMatch[]): IFeedbackItem {
     // starting feedback
     if (sequence.length === 0) {
       return this.default_feedback;
@@ -39,7 +39,7 @@ var feedback = {
 
     // tie feedback to the longest match for longer sequences
     let longest_match = sequence[0];
-    for (let match of Array.from(sequence.slice(1))) {
+    for (const match of Array.from(sequence.slice(1))) {
       if (match.token.length > longest_match.token.length) {
         longest_match = match;
       }
@@ -73,23 +73,20 @@ var feedback = {
         return this.get_dictionary_match_feedback(match, is_sole_match);
 
       case "spatial":
-        var layout = match.graph.toUpperCase();
-        var warning =
-          match.turns === 1
-            ? "Straight rows of keys are easy to guess"
-            : "Short keyboard patterns are easy to guess";
         return {
-          warning,
+          warning:
+            match.turns === 1
+              ? "Straight rows of keys are easy to guess"
+              : "Short keyboard patterns are easy to guess",
           suggestions: ["Use a longer keyboard pattern with more turns"],
         };
 
       case "repeat":
-        warning =
-          match.base_token.length === 1
-            ? 'Repeats like "aaa" are easy to guess'
-            : 'Repeats like "abcabcabc" are only slightly harder to guess than "abc"';
         return {
-          warning,
+          warning:
+            match.base_token.length === 1
+              ? 'Repeats like "aaa" are easy to guess'
+              : 'Repeats like "abcabcabc" are only slightly harder to guess than "abc"',
           suggestions: ["Avoid repeated words and characters"],
         };
 
