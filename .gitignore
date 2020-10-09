@@ -9,3 +9,4 @@ lib
 *.swo
 tmux-*.log
 dist
+coverage
