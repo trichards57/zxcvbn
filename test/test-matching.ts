@@ -8,13 +8,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import test from "tape";
-import matching, {
-  IAnyMatch,
-  IDictionaryList,
-  INullableStringTableTable,
-  IStringTable,
-} from "../src/matching";
-import adjacency_graphs from "../src/adjacency_graphs";
+import * as matching from "../src/matching";
+import * as adjacency_graphs from "../src/adjacency_graphs";
+import { IAnyMatch } from "../src/matching";
 
 // takes a pattern and list of prefixes/suffixes
 // returns a bunch of variants of that pattern embedded
@@ -187,7 +183,7 @@ test("matching utils", function (t) {
 test("dictionary matching", function (t) {
   let rank: unknown;
   const dm = (pw: string) => matching.dictionary_match(pw, test_dicts);
-  const test_dicts: IDictionaryList = {
+  const test_dicts: Record<string, Record<string, number>> = {
     d1: {
       motherboard: 1,
       mother: 2,
@@ -371,7 +367,7 @@ test("reverse dictionary matching", function (t) {
 test("l33t matching", function (t) {
   let dictionary_name, msg, rank, sub;
   let ij, password, pattern, word;
-  const test_table = {
+  const test_table: Record<string, string[]> = {
     a: ["4", "@"],
     c: ["(", "{", "[", "<"],
     g: ["6", "9"],
@@ -385,7 +381,7 @@ test("l33t matching", function (t) {
     ["4", { a: ["4"] }],
     ["4@", { a: ["4", "@"] }],
     ["4({60", { a: ["4"], c: ["(", "{"], g: ["6"], o: ["0"] }],
-  ] as [string, IStringTable][]) {
+  ] as [string, Record<string, string[]>][]) {
     msg =
       "reduces l33t table to only the substitutions that a password might be employing";
     t.deepEquals(
@@ -406,7 +402,7 @@ test("l33t matching", function (t) {
         { "4": "a", "(": "c" },
       ],
     ],
-  ] as [IStringTable, IStringTable[]][]) {
+  ] as [Record<string, string[]>, Record<string, string[]>[]][]) {
     msg =
       "enumerates the different sets of l33t substitutions a password might be using";
     t.deepEquals(matching.enumerate_l33t_subs(table), subs, msg);
@@ -515,7 +511,7 @@ test("spatial matching", function (t) {
   }
 
   // for testing, make a subgraph that contains a single keyboard
-  let _graphs: INullableStringTableTable = {
+  let _graphs: Record<string, Record<string, (string | null)[]>> = {
     qwerty: adjacency_graphs.qwerty,
   };
   const pattern = "6tfGHJ";
@@ -535,24 +531,24 @@ test("spatial matching", function (t) {
     }
   );
 
-  for (const [pattern, keyboard, turns, shifts] of [
-    ["12345", "qwerty", 1, 0],
-    ["@WSX", "qwerty", 1, 4],
-    ["6tfGHJ", "qwerty", 2, 3],
-    ["hGFd", "qwerty", 1, 2],
-    ["/;p09876yhn", "qwerty", 3, 0],
-    ["Xdr%", "qwerty", 1, 2],
-    ["159-", "keypad", 1, 0],
-    ["*84", "keypad", 1, 0],
-    ["/8520", "keypad", 1, 0],
-    ["369", "keypad", 1, 0],
-    ["/963.", "mac_keypad", 1, 0],
-    ["*-632.0214", "mac_keypad", 9, 0],
-    ["aoEP%yIxkjq:", "dvorak", 4, 5],
-    [";qoaOQ:Aoq;a", "dvorak", 11, 4],
-  ] as [string, string, number, number][]) {
+  for (const [pattern, keyboard, graph, turns, shifts] of [
+    ["12345", "qwerty", adjacency_graphs.qwerty, 1, 0],
+    ["@WSX", "qwerty", adjacency_graphs.qwerty, 1, 4],
+    ["6tfGHJ", "qwerty", adjacency_graphs.qwerty, 2, 3],
+    ["hGFd", "qwerty", adjacency_graphs.qwerty, 1, 2],
+    ["/;p09876yhn", "qwerty", adjacency_graphs.qwerty, 3, 0],
+    ["Xdr%", "qwerty", adjacency_graphs.qwerty, 1, 2],
+    ["159-", "keypad", adjacency_graphs.keypad, 1, 0],
+    ["*84", "keypad", adjacency_graphs.keypad, 1, 0],
+    ["/8520", "keypad", adjacency_graphs.keypad, 1, 0],
+    ["369", "keypad", adjacency_graphs.keypad, 1, 0],
+    ["/963.", "mac_keypad", adjacency_graphs.mac_keypad, 1, 0],
+    ["*-632.0214", "mac_keypad", adjacency_graphs.mac_keypad, 9, 0],
+    ["aoEP%yIxkjq:", "dvorak", adjacency_graphs.dvorak, 4, 5],
+    [";qoaOQ:Aoq;a", "dvorak", adjacency_graphs.dvorak, 11, 4],
+  ] as [string, string, Record<string, string[]>, number, number][]) {
     _graphs = {
-      [keyboard]: adjacency_graphs[keyboard],
+      [keyboard]: graph,
     };
     matches = matching.spatial_match(pattern, _graphs);
     msg = `matches '${pattern}' as a ${keyboard} pattern`;

@@ -1,26 +1,31 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-import matching from "./matching";
-import scoring from "./scoring";
-import time_estimates from "./time_estimates";
-import feedback from "./feedback";
+import * as matching from "./matching";
+import { IAnyMatch } from "./matching";
+import * as scoring from "./scoring";
+import time_estimates, { IAttackTimes } from "./time_estimates";
+import * as feedback from "./feedback";
+import { IFeedbackItem } from "./feedback";
 
 const time = () => new Date().getTime();
 
-const zxcvbn = function (password: string, user_inputs: string[]) {
-  if (user_inputs == null) {
-    user_inputs = [];
-  }
+interface IZXCVBNResult extends IAttackTimes {
+  sequence: IAnyMatch[];
+  guesses: number;
+  guesses_log10: number;
+  password: string;
+  score: number;
+  calc_time: number;
+  fb: IFeedbackItem;
+}
+
+export default function zxcvbn(
+  password: string,
+  user_inputs: (string | number | boolean)[] = []
+): IZXCVBNResult {
   const start = time();
   // reset the user inputs matcher on a per-request basis to keep things stateless
   const sanitized_inputs: string[] = [];
-  for (const arg of Array.from(user_inputs)) {
-    if (["string", "number", "boolean"].includes(typeof arg)) {
+  for (const arg of user_inputs) {
+    if (typeof arg in ["string", "number", "boolean"]) {
       sanitized_inputs.push(arg.toString().toLowerCase());
     }
   }
@@ -33,6 +38,4 @@ const zxcvbn = function (password: string, user_inputs: string[]) {
   const fb = feedback.get_feedback(result.score, result.sequence);
 
   return { ...result, ...attack_times, calc_time, fb };
-};
-
-module.exports = zxcvbn;
+}

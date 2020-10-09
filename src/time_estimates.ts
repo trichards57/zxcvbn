@@ -17,7 +17,7 @@ interface ICrackTimes {
 
 type ICrackTimesDisplay = { [P in keyof ICrackTimes]?: string };
 
-interface IAttackTimes {
+export interface IAttackTimes {
   crack_times_seconds: ICrackTimes;
   crack_times_display: ICrackTimesDisplay;
   score: number;

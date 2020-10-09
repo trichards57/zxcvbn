@@ -7,8 +7,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import test from "tape";
-import scoring from "../src/scoring";
-import matching, {
+import * as scoring from "../src/scoring";
+import {
+  empty,
   IDateMatch,
   IDictionaryMatch,
   IMatch,
@@ -16,7 +17,7 @@ import matching, {
   IRepeatMatch,
   ISequenceMatch,
   ISpatialMatch,
-  ISubstitution,
+  omnimatch,
 } from "../src/matching";
 
 const { log2 } = scoring;
@@ -275,7 +276,7 @@ test("repeat guesses", function (t) {
   ] as [string, string, number][]) {
     const base_guesses = scoring.most_guessable_match_sequence(
       base_token,
-      matching.omnimatch(base_token)
+      omnimatch(base_token)
     ).guesses;
     const match: IRepeatMatch = {
       token,
@@ -609,7 +610,7 @@ test("l33t variants", function (t) {
     ["a4a4aa", nCk(6, 2) + nCk(6, 1), { "4": "a" }],
     ["4a4a44", nCk(6, 2) + nCk(6, 1), { "4": "a" }],
     ["a44att+", (nCk(4, 2) + nCk(4, 1)) * nCk(3, 1), { "4": "a", "+": "t" }],
-  ] as [string, number, ISubstitution][]) {
+  ] as [string, number, Record<string, string>][]) {
     match = {
       token: word,
       rank: 32,
@@ -617,7 +618,7 @@ test("l33t variants", function (t) {
       dictionary_name: "dic",
       i: 1,
       j: 2,
-      l33t: !matching.empty(sub),
+      l33t: !empty(sub),
       matched_word: "a",
       reversed: false,
       sub,
