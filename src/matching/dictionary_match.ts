@@ -36,6 +36,12 @@ for (const name in frequency_lists) {
   RANKED_DICTIONARIES[name] = build_ranked_dictionary(lst);
 }
 
+/**
+ * Attempts to match a string with a ranked dictionary of words.
+ *
+ * @param password - The string to examine
+ * @param _ranked_dictionaries - For unit testing only: allows overriding the available dictionaries
+ */
 export function dictionary_match(
   password: string,
   _ranked_dictionaries = RANKED_DICTIONARIES
@@ -67,6 +73,12 @@ export function dictionary_match(
   return sorted(matches);
 }
 
+/**
+ * Attempts to match a string with a ranked dictionary of words after it is reversed.
+ *
+ * @param password - The string to examine
+ * @param _ranked_dictionaries - For unit testing only: allows overriding the available dictionaries
+ */
 export function reverse_dictionary_match(
   password: string,
   _ranked_dictionaries = RANKED_DICTIONARIES
@@ -84,13 +96,21 @@ export function reverse_dictionary_match(
     .sort((m1, m2) => m1.i - m2.i || m1.j - m2.j);
 }
 
+/**
+ * Adds a user provided dictionary as a user_inputs dictionary.
+ * @param ordered_list The list to add as a dictionary.
+ */
 export function set_user_input_dictionary(ordered_list: string[]): void {
   RANKED_DICTIONARIES["user_inputs"] = build_ranked_dictionary([
     ...ordered_list,
   ]);
 }
 
-// makes a pruned copy of l33t_table that only includes password's possible substitutions
+/**
+ * Prunes a copy of a l33t_table to only include the substitutions of interest.
+ * @param password The password to consider
+ * @param table The table to prune.
+ */
 export function relevant_l33t_subtable(
   password: string,
   table: Record<string, string[]>
@@ -109,51 +129,53 @@ export function relevant_l33t_subtable(
   return subtable;
 }
 
-// returns the list of possible 1337 replacement dictionaries for a given password
+function dedup(subs: [string, string][][]) {
+  const deduped: [string, string][][] = [];
+  const members = new Set<string>();
+  for (const sub of subs) {
+    const label = sub
+      .map((k, v) => [k, v] as [[string, string], number])
+      .sort()
+      .map((k, v) => k + "," + v)
+      .join("-");
+    if (!members.has(label)) {
+      members.add(label);
+      deduped.push(sub);
+    }
+  }
+  return deduped;
+}
+
+function helper(
+  keys: string[],
+  table: Record<string, string[]>,
+  subs: [string, string][][] = [[]]
+): [string, string][][] {
+  if (!keys.length) return subs;
+
+  const [first_key, ...rest_keys] = keys;
+  const next_subs: [string, string][][] = [];
+  for (const l33t_chr of table[first_key]) {
+    for (const sub of subs) {
+      const dup_l33t_index = sub.findIndex((s) => s[0] === l33t_chr);
+
+      if (dup_l33t_index !== -1) next_subs.push(sub);
+      next_subs.push([...sub, [l33t_chr, first_key]]);
+    }
+  }
+
+  subs = dedup(next_subs);
+  return helper(rest_keys, table, subs);
+}
+
+/**
+ * Returns the list of possible l33t replacement dictionaries for a given password.
+ * @param table The table to create l33t substitutions for.
+ */
 export function enumerate_l33t_subs(
   table: Record<string, string[]>
 ): Record<string, string>[] {
-  const keys = Object.keys(table);
-  let subs: [string, string][][] = [[]];
-
-  const dedup = function (subs: [string, string][][]) {
-    const deduped: [string, string][][] = [];
-    const members = new Set<string>();
-    for (const sub of subs) {
-      const label = sub
-        .map((k, v) => [k, v] as [[string, string], number])
-        .sort()
-        .map((k, v) => k + "," + v)
-        .join("-");
-      if (!members.has(label)) {
-        members.add(label);
-        deduped.push(sub);
-      }
-    }
-    return deduped;
-  };
-
-  function helper(keys: string[]): void {
-    if (!keys.length) return;
-
-    const [first_key, ...rest_keys] = keys;
-    const next_subs: [string, string][][] = [];
-    for (const l33t_chr of table[first_key]) {
-      for (const sub of subs) {
-        const dup_l33t_index = sub.findIndex((s) => s[0] === l33t_chr);
-
-        if (dup_l33t_index !== -1) next_subs.push(sub);
-        next_subs.push([...sub, [l33t_chr, first_key]]);
-      }
-    }
-
-    subs = dedup(next_subs);
-    return helper(rest_keys);
-  }
-
-  helper(keys);
-
-  return subs.map((s) => {
+  return helper(Object.keys(table), table).map((s) => {
     const sub_dictionary: Record<string, string> = {};
     for (const [l33t_chr, chr] of s) {
       sub_dictionary[l33t_chr] = chr;
