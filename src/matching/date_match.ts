@@ -1,18 +1,12 @@
 import { REFERENCE_YEAR } from "../scoring/support";
-//-------------------------------------------------------------------------------
-// date matching ----------------------------------------------------------------
-
 import { IMatch, sorted } from "./support";
 
-//-------------------------------------------------------------------------------
 interface IDM {
   day: number;
   month: number;
 }
 
 interface IDMY extends IDM {
-  day: number;
-  month: number;
   year: number;
 }
 
@@ -54,17 +48,22 @@ const DATE_SPLITS: Record<number, [number, number][]> = {
   ],
 };
 
+/**
+ * Attempts to match a string with a date.
+ *
+ * @remarks
+ * A date is recognised if it is:
+ * - Any 3-tuple that starts or ends with a 2- or 4-digit year
+ * - With 2 or 0 separator chars (1.1.91 or 1191)
+ * - Maybe zero-padded (01-01-91 vs 1-1-91)
+ * - Has a month between 1 and 12
+ * - Has a day between 1 and 31
+ *
+ * Note: This isn't true date parsing, and allows invalid dates like 31 Feb or 29 Feb on non-leap-years.
+ *
+ * @param password - The string to examine
+ */
 export function date_match(password: string): IDateMatch[] {
-  // a "date" is recognized as:
-  //   any 3-tuple that starts or ends with a 2- or 4-digit year,
-  //   with 2 or 0 separator chars (1.1.91 or 1191),
-  //   maybe zero-padded (01-01-91 vs 1-1-91),
-  //   a month between 1 and 12,
-  //   a day between 1 and 31.
-  //
-  // note: this isn't true date parsing in that "feb 31st" is allowed,
-  // this doesn't check for leap years, etc.
-  //
   // recipe:
   // start with regex to find maybe-dates, then attempt to map the integers
   // onto month-day-year to filter the maybe-dates into dates.
@@ -73,7 +72,6 @@ export function date_match(password: string): IDateMatch[] {
   // note: instead of using a lazy or greedy regex to find many dates over the full string,
   // this uses a ^...$ regex against every substring of the password -- less performant but leads
   // to every possible date match.
-  let dmy: IDMY | undefined, token: string;
   const matches: IDateMatch[] = [];
   const maybe_date_no_separator = /^\d{4,8}$/;
   const maybe_date_with_separator = new RegExp(`\
@@ -88,33 +86,25 @@ $\
 
   // dates without separators are between length 4 '1191' and 8 '11111991'
   for (let i = 0; i <= password.length - 4; i++) {
-    for (let j = i + 3; j <= i + 7; j++) {
-      if (j >= password.length) {
-        break;
-      }
-      token = password.slice(i, j + 1);
+    for (let j = i + 3; j <= i + 7 && j < password.length; j++) {
+      const token = password.slice(i, j + 1);
       if (!maybe_date_no_separator.exec(token)) {
         continue;
       }
-      const candidates: IDMY[] = [];
-      for (const [k, l] of DATE_SPLITS[token.length] as number[][]) {
-        dmy = map_ints_to_dmy([
-          parseInt(token.slice(0, k)),
-          parseInt(token.slice(k, l)),
-          parseInt(token.slice(l)),
-        ]);
-        if (dmy != undefined) {
-          candidates.push(dmy);
-        }
-      }
+      const candidates: IDMY[] = DATE_SPLITS[token.length]
+        .map(([k, l]) =>
+          map_ints_to_dmy([
+            parseInt(token.slice(0, k)),
+            parseInt(token.slice(k, l)),
+            parseInt(token.slice(l)),
+          ])
+        )
+        .filter((d) => d) as IDMY[];
       if (!(candidates.length > 0)) continue;
 
-      // at this point: different possible dmy mappings for the same i,j substring.
-      // match the candidate date that likely takes the fewest guesses: a year closest to 2000.
-      // (scoring.REFERENCE_YEAR).
-      //
-      // ie, considering '111504', prefer 11-15-04 to 1-1-1504
-      // (interpreting '04' as 2004)
+      // At this point: different possible dmy mappings for the same i,j substring.
+      // Match the candidate date that likely takes the fewest guesses: a year closest to REFERENCE_YEAR.
+      // For example: considering '111504', prefer 11-15-04 to 1-1-1504 (interpreting '04' as 2004)
       const [first, ...rest] = candidates;
       let best_candidate = first;
       const metric = (candidate: IDMY) =>
@@ -140,14 +130,12 @@ $\
 
   // dates with separators are between length 6 '1/1/91' and 10 '11/11/1991'
   for (let i = 0; i < password.length; i++) {
-    for (let j = i + 5; j <= i + 9; j++) {
-      if (j >= password.length) break;
-
-      token = password.slice(i, +j + 1 || undefined);
+    for (let j = i + 5; j <= i + 9 && j < password.length; j++) {
+      const token = password.slice(i, j + 1);
       const rx_match = maybe_date_with_separator.exec(token);
       if (!rx_match) continue;
 
-      dmy = map_ints_to_dmy([
+      const dmy = map_ints_to_dmy([
         parseInt(rx_match[1]),
         parseInt(rx_match[3]),
         parseInt(rx_match[4]),
@@ -188,7 +176,7 @@ $\
   );
 }
 
-export function map_ints_to_dmy(ints: number[]): IDMY | undefined {
+function map_ints_to_dmy(ints: number[]): IDMY | undefined {
   // given a 3-tuple, discard if:
   //   middle int is over 31 (for all dmy formats, years are never allowed in the middle)
   //   middle int is zero
@@ -256,7 +244,7 @@ export function map_ints_to_dmy(ints: number[]): IDMY | undefined {
   }
 }
 
-export function map_ints_to_dm(ints: number[]): IDM | undefined {
+function map_ints_to_dm(ints: number[]): IDM | undefined {
   for (const [d, m] of [ints, [...ints].reverse()]) {
     if (1 <= d && d <= 31 && 1 <= m && m <= 12) {
       return {
@@ -267,7 +255,7 @@ export function map_ints_to_dm(ints: number[]): IDM | undefined {
   }
 }
 
-export function two_to_four_digit_year(year: number): number {
+function two_to_four_digit_year(year: number): number {
   if (year > 99) {
     return year;
   } else if (year > 50) {
