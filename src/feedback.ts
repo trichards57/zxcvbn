@@ -101,6 +101,7 @@ export function get_match_feedback(
         suggestions: ["Avoid dates and years that are associated with you"],
       };
   }
+  return;
 }
 
 export function get_dictionary_match_feedback(

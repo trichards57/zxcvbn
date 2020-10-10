@@ -242,6 +242,7 @@ function map_ints_to_dmy(ints: number[]): IDMY | undefined {
       };
     }
   }
+  return;
 }
 
 function map_ints_to_dm(ints: number[]): IDM | undefined {
@@ -253,6 +254,7 @@ function map_ints_to_dm(ints: number[]): IDM | undefined {
       };
     }
   }
+  return;
 }
 
 function two_to_four_digit_year(year: number): number {
