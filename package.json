@@ -8,11 +8,9 @@
   "repository": "trichards57/zxcvbn",
   "scripts": {
     "test": "jest",
-    "test-saucelabs": "zuul -- test/*.ts",
     "build": "npm run build-lib && npm run build-dist",
     "build-lib": "tsc",
     "build-dist": "make-dir dist && browserify --standalone zxcvbn -t uglifyify lib/main.js > dist/zxcvbn.js",
-    "prepublishOnly": "npm run build",
     "lint": "eslint"
   },
   "devDependencies": {
