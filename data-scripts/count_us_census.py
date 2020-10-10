@@ -18,7 +18,7 @@ Then run:
 %s dist.male.names   ../data/male_names.txt
 
 for each file.
-''' % [sys.argv[0]] * 3
+''' % (sys.argv[0], sys.argv[0], sys.argv[0])
 
 def main(input_filename, output_filename):
     with codecs.open(output_filename, 'w', 'utf8') as f:
@@ -29,7 +29,7 @@ def main(input_filename, output_filename):
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
-        print usage()
+        print (usage())
     else:
         main(*sys.argv[1:])
     sys.exit(0)
