@@ -1,4 +1,4 @@
-import { IAnyMatch, IRepeatMatch, repeat_match } from "../src/matching";
+import { IRepeatMatch, repeat_match } from "../src/matching/repeat_match";
 import { log10 } from "../src/scoring";
 import { generatePasswords } from "./test-support";
 
@@ -6,7 +6,7 @@ describe("matching", () => {
   describe("repeat_match", () => {
     it("doesn't matching empty or 1-character repeat patterns", () => {
       for (const password of ["", "#"]) {
-        const expected: IAnyMatch[] = [];
+        const expected: IRepeatMatch[] = [];
         const actual = repeat_match(password);
 
         expect(actual).toEqual(expected);

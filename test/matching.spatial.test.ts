@@ -1,5 +1,5 @@
 import { dvorak, keypad, mac_keypad, qwerty } from "../src/adjacency_graphs";
-import { IAnyMatch, ISpatialMatch, spatial_match } from "../src/matching";
+import { ISpatialMatch, spatial_match } from "../src/matching/spatial_match";
 
 const testGraphs = {
   qwerty: qwerty,
@@ -8,7 +8,7 @@ const testGraphs = {
 describe("matching", () => {
   describe("spatial_match", () => {
     it("doesn't match 1- and 2-character spatial patterns", () => {
-      const expected: IAnyMatch[] = [];
+      const expected: ISpatialMatch[] = [];
       for (const password of ["", "/", "qw", "*/"]) {
         const actual = spatial_match(password);
         expect(actual).toEqual(expected);

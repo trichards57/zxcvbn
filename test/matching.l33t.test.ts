@@ -1,10 +1,9 @@
 import {
   enumerate_l33t_subs,
-  IAnyMatch,
   IDictionaryMatch,
   l33t_match,
   relevant_l33t_subtable,
-} from "../src/matching";
+} from "../src/matching/dictionary_match";
 
 const test_table = {
   a: ["4", "@"],
@@ -65,14 +64,14 @@ describe("matching", () => {
 
   describe("l33t_match", () => {
     it("doesn't match empty string", () => {
-      const expected: IAnyMatch[] = [];
+      const expected: IDictionaryMatch[] = [];
       const actual = l33t_match("", dicts, test_table);
 
       expect(actual).toEqual(expected);
     });
 
     it("doesn't match non-l33t words", () => {
-      const expected: IAnyMatch[] = [];
+      const expected: IDictionaryMatch[] = [];
       const actual = l33t_match("password", dicts, test_table);
 
       expect(actual).toEqual(expected);
@@ -189,21 +188,21 @@ describe("matching", () => {
     });
 
     it("doesn't match when multiple substitutions are needed for the same letter", () => {
-      const expected: IAnyMatch[] = [];
+      const expected: IDictionaryMatch[] = [];
       const actual = l33t_match("p4@ssword", dicts, test_table);
 
       expect(actual).toEqual(expected);
     });
 
     it("doesn't match single character l33ted words", () => {
-      const expected: IAnyMatch[] = [];
+      const expected: IDictionaryMatch[] = [];
       const actual = l33t_match("4 1 @", dicts, test_table);
 
       expect(actual).toEqual(expected);
     });
 
     it("doesn't match with subsets of possible l33t substitutions", () => {
-      const expected: IAnyMatch[] = [];
+      const expected: IDictionaryMatch[] = [];
       const actual = l33t_match("4sdf0", dicts, test_table);
 
       expect(actual).toEqual(expected);

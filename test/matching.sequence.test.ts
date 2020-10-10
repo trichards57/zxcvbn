@@ -1,11 +1,11 @@
-import { IAnyMatch, ISequenceMatch, sequence_match } from "../src/matching";
+import { ISequenceMatch, sequence_match } from "../src/matching/sequence_match";
 import { generatePasswords } from "./test-support";
 
 describe("matching", () => {
   describe("sequence_match", () => {
     it("doesn't match very empty or 1 length sequences", () => {
       for (const password of ["", "a", "1"]) {
-        const expected: IAnyMatch[] = [];
+        const expected: ISequenceMatch[] = [];
         const actual = sequence_match(password);
 
         expect(actual).toEqual(expected);
