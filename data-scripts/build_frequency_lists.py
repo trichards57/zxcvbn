@@ -6,6 +6,7 @@ import codecs
 
 from operator import itemgetter
 
+
 def usage():
     return '''
 usage:
@@ -27,40 +28,45 @@ A warning will be printed if DICTIONARIES contains a dictionary name that doesn'
 passed data dir, or vice-versa.
     ''' % sys.argv[0]
 
+
 # maps dict name to num words. None value means "include all words"
 DICTIONARIES = dict(
-    us_tv_and_film    = 30000,
-    english_wikipedia = 30000,
-    passwords         = 30000,
-    surnames          = 10000,
-    male_names        = None,
-    female_names      = None,
+    us_tv_and_film=30000,
+    english_wikipedia=30000,
+    passwords=30000,
+    surnames=10000,
+    male_names=None,
+    female_names=None,
 )
 
 # returns {list_name: {token: rank}}, as tokens and ranks occur in each file.
+
+
 def parse_frequency_lists(data_dir):
     freq_lists = {}
     for filename in os.listdir(data_dir):
         freq_list_name, ext = os.path.splitext(filename)
         if freq_list_name not in DICTIONARIES:
             msg = 'Warning: %s appears in %s directory but not in DICTIONARY settings. Excluding.'
-            print msg % (freq_list_name, data_dir)
+            print(msg % (freq_list_name, data_dir))
             continue
         token_to_rank = {}
         with codecs.open(os.path.join(data_dir, filename), 'r', 'utf8') as f:
             for i, line in enumerate(f):
-                rank = i + 1 # rank starts at 1
+                rank = i + 1  # rank starts at 1
                 token = line.split()[0]
                 token_to_rank[token] = rank
         freq_lists[freq_list_name] = token_to_rank
     for freq_list_name in DICTIONARIES:
         if freq_list_name not in freq_lists:
             msg = 'Warning: %s appears in DICTIONARY settings but not in %s directory. Excluding.'
-            print msg % (freq_list, data_dir)
+            print(msg % (freq_list_name, data_dir))
     return freq_lists
+
 
 def is_rare_and_short(token, rank):
     return rank >= 10**len(token)
+
 
 def has_comma_or_double_quote(token, rank, lst_name):
     # hax, switch to csv or similar if this excludes too much.
@@ -71,6 +77,7 @@ def has_comma_or_double_quote(token, rank, lst_name):
         return True
     return False
 
+
 def filter_frequency_lists(freq_lists):
     '''
     filters frequency data according to:
@@ -79,15 +86,15 @@ def filter_frequency_lists(freq_lists):
           at lower rank.
         - cut off final freq_list at limits set in DICTIONARIES, if any.
     '''
-    filtered_token_and_rank = {} # maps {name: [(token, rank), ...]}
+    filtered_token_and_rank = {}  # maps {name: [(token, rank), ...]}
     token_count = {}             # maps freq list name: current token count.
     for name in freq_lists:
         filtered_token_and_rank[name] = []
         token_count[name] = 0
-    minimum_rank = {} # maps token -> lowest token rank across all freq lists
-    minimum_name = {} # maps token -> freq list name with lowest token rank
-    for name, token_to_rank in freq_lists.iteritems():
-        for token, rank in token_to_rank.iteritems():
+    minimum_rank = {}  # maps token -> lowest token rank across all freq lists
+    minimum_name = {}  # maps token -> freq list name with lowest token rank
+    for name, token_to_rank in freq_lists.items():
+        for token, rank in token_to_rank.items():
             if token not in minimum_rank:
                 assert token not in minimum_name
                 minimum_rank[token] = rank
@@ -99,8 +106,8 @@ def filter_frequency_lists(freq_lists):
                 if rank < min_rank:
                     minimum_rank[token] = rank
                     minimum_name[token] = name
-    for name, token_to_rank in freq_lists.iteritems():
-        for token, rank in token_to_rank.iteritems():
+    for name, token_to_rank in freq_lists.items():
+        for token, rank in token_to_rank.items():
             if minimum_name[token] != name:
                 continue
             if is_rare_and_short(token, rank) or has_comma_or_double_quote(token, rank, name):
@@ -108,35 +115,40 @@ def filter_frequency_lists(freq_lists):
             filtered_token_and_rank[name].append((token, rank))
             token_count[name] += 1
     result = {}
-    for name, token_rank_pairs in filtered_token_and_rank.iteritems():
+    for name, token_rank_pairs in filtered_token_and_rank.items():
         token_rank_pairs.sort(key=itemgetter(1))
         cutoff_limit = DICTIONARIES[name]
         if cutoff_limit and len(token_rank_pairs) > cutoff_limit:
             token_rank_pairs = token_rank_pairs[:cutoff_limit]
-        result[name] = [pair[0] for pair in token_rank_pairs] # discard rank post-sort
+        result[name] = [pair[0]
+                        for pair in token_rank_pairs]  # discard rank post-sort
     return result
 
+
 def to_kv(lst, lst_name):
-    val = '"%s".split(",")' % ','.join(lst)
+    val = '"%s".split(\r\n    ","\r\n  ),' % ','.join(lst)
     return '%s: %s' % (lst_name, val)
+
 
 def main():
     if len(sys.argv) != 3:
-        print usage()
+        print(usage())
         sys.exit(0)
     data_dir, output_file = sys.argv[1:]
     unfiltered_freq_lists = parse_frequency_lists(data_dir)
     freq_lists = filter_frequency_lists(unfiltered_freq_lists)
     with codecs.open(output_file, 'w', 'utf8') as f:
         script_name = os.path.split(sys.argv[0])[1]
-        f.write('# generated by %s\n' % script_name)
-        f.write('frequency_lists = \n  ')
+        f.write('// generated by %s\n' % script_name)
+        f.write('const frequency_lists: Record<string,string[]> = { \n  ')
         lines = []
-        for name, lst in freq_lists.iteritems():
+        for name, lst in freq_lists.items():
             lines.append(to_kv(lst, name))
         f.write('\n  '.join(lines))
-        f.write('\n')
-        f.write('module.exports = frequency_lists\n')
+        f.write('\r\n};\r\n')
+        f.write('\r\n')
+        f.write('export default frequency_lists;\n')
+
 
 if __name__ == '__main__':
     main()
