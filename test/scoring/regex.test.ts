@@ -1,10 +1,7 @@
-import "jest";
-import { IRegexMatch } from "../src/matching";
-import {
-  estimate_guesses,
-  REFERENCE_YEAR,
-  regex_guesses,
-} from "../src/scoring";
+import { IRegexMatch } from "../../src/matching/regex_match";
+import { estimate_guesses } from "../../src/scoring";
+import { regex_guesses } from "../../src/scoring/regex_guesses";
+import { REFERENCE_YEAR } from "../../src/scoring/support";
 
 describe("scoring", () => {
   describe("regex guesses", () => {

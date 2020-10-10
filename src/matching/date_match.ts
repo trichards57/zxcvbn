@@ -1,4 +1,4 @@
-import { REFERENCE_YEAR } from "../scoring";
+import { REFERENCE_YEAR } from "../scoring/support";
 //-------------------------------------------------------------------------------
 // date matching ----------------------------------------------------------------
 

@@ -1,6 +1,6 @@
-import "jest";
-import { ISequenceMatch } from "../src/matching";
-import { estimate_guesses, sequence_guesses } from "../src/scoring";
+import { ISequenceMatch } from "../../src/matching/sequence_match";
+import { estimate_guesses } from "../../src/scoring";
+import { sequence_guesses } from "../../src/scoring/sequence_guesses";
 
 describe("scoring", () => {
   describe("sequence_guesses", () => {

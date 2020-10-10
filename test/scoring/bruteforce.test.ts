@@ -1,7 +1,7 @@
-import { IAnyMatch, IBruteForceMatch, IDateMatch } from "../src/matching";
-import { most_guessable_match_sequence } from "../src/scoring";
+import { IAnyMatch, IBruteForceMatch } from "../../src/matching";
+import { most_guessable_match_sequence } from "../../src/scoring";
 
-function getTestMatches(i: number, j: number, guesses: number): IDateMatch {
+function getTestMatches(i: number, j: number, guesses: number): IAnyMatch {
   return {
     i,
     j,

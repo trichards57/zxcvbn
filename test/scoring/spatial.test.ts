@@ -1,11 +1,11 @@
-import { ISpatialMatch } from "../src/matching";
+import { ISpatialMatch } from "../../src/matching/spatial_match";
+import { estimate_guesses } from "../../src/scoring";
 import {
-  estimate_guesses,
   KEYBOARD_AVERAGE_DEGREE,
   KEYBOARD_STARTING_POSITIONS,
-  nCk,
   spatial_guesses,
-} from "../src/scoring";
+} from "../../src/scoring/spatial_guesses";
+import { nCk } from "../../src/scoring/support";
 
 describe("scoring", () => {
   describe("spatial_guesses", () => {

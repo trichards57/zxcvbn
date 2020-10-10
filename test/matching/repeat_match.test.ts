@@ -1,5 +1,4 @@
 import { IRepeatMatch, repeat_match } from "../../src/matching/repeat_match";
-import { log10 } from "../../src/scoring";
 import { generatePasswords } from "../test-support";
 
 describe("matching", () => {
@@ -31,7 +30,7 @@ describe("matching", () => {
             base_matches: [
               {
                 guesses: 11,
-                guesses_log10: log10(11),
+                guesses_log10: Math.log10(11),
                 i: 0,
                 j: 0,
                 pattern: "bruteforce",
@@ -61,7 +60,7 @@ describe("matching", () => {
               base_matches: [
                 {
                   guesses: 11,
-                  guesses_log10: log10(11),
+                  guesses_log10: Math.log10(11),
                   i: 0,
                   j: 0,
                   pattern: "bruteforce",
@@ -89,7 +88,7 @@ describe("matching", () => {
           base_matches: [
             {
               guesses: 11,
-              guesses_log10: log10(11),
+              guesses_log10: Math.log10(11),
               i: 0,
               j: 0,
               pattern: "bruteforce",
@@ -108,7 +107,7 @@ describe("matching", () => {
           base_matches: [
             {
               guesses: 11,
-              guesses_log10: log10(11),
+              guesses_log10: Math.log10(11),
               i: 0,
               j: 0,
               pattern: "bruteforce",
@@ -127,7 +126,7 @@ describe("matching", () => {
           base_matches: [
             {
               guesses: 11,
-              guesses_log10: log10(11),
+              guesses_log10: Math.log10(11),
               i: 0,
               j: 0,
               pattern: "bruteforce",
@@ -146,7 +145,7 @@ describe("matching", () => {
           base_matches: [
             {
               guesses: 11,
-              guesses_log10: log10(11),
+              guesses_log10: Math.log10(11),
               i: 0,
               j: 0,
               pattern: "bruteforce",
@@ -173,7 +172,7 @@ describe("matching", () => {
           base_matches: [
             {
               guesses: 11,
-              guesses_log10: log10(11),
+              guesses_log10: Math.log10(11),
               i: 0,
               j: 0,
               pattern: "bruteforce",
@@ -192,7 +191,7 @@ describe("matching", () => {
           base_matches: [
             {
               guesses: 11,
-              guesses_log10: log10(11),
+              guesses_log10: Math.log10(11),
               i: 0,
               j: 0,
               pattern: "bruteforce",
@@ -211,7 +210,7 @@ describe("matching", () => {
           base_matches: [
             {
               guesses: 11,
-              guesses_log10: log10(11),
+              guesses_log10: Math.log10(11),
               i: 0,
               j: 0,
               pattern: "bruteforce",
@@ -230,7 +229,7 @@ describe("matching", () => {
           base_matches: [
             {
               guesses: 11,
-              guesses_log10: log10(11),
+              guesses_log10: Math.log10(11),
               i: 0,
               j: 0,
               pattern: "bruteforce",
@@ -257,7 +256,7 @@ describe("matching", () => {
           base_matches: [
             {
               guesses: 8,
-              guesses_log10: log10(8),
+              guesses_log10: Math.log10(8),
               i: 0,
               j: 1,
               pattern: "sequence",
@@ -286,7 +285,7 @@ describe("matching", () => {
           base_matches: [
             {
               guesses: 1000,
-              guesses_log10: log10(1000),
+              guesses_log10: Math.log10(1000),
               i: 0,
               j: 2,
               pattern: "bruteforce",
@@ -312,7 +311,7 @@ describe("matching", () => {
           base_matches: [
             {
               guesses: 8,
-              guesses_log10: log10(8),
+              guesses_log10: Math.log10(8),
               i: 0,
               j: 1,
               pattern: "sequence",

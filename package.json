@@ -4,13 +4,13 @@
   "description": "realistic password strength estimation, updated and ported to Typescript from Dan Wheeler's zxcvbn",
   "author": "Tony Richards",
   "license": "MIT",
-  "main": "lib/main.js",
+  "main": "lib/index.js",
   "repository": "trichards57/zxcvbn",
   "scripts": {
     "test": "jest",
     "build": "npm run build-lib && npm run build-dist",
     "build-lib": "tsc",
-    "build-dist": "make-dir dist && browserify --standalone zxcvbn -t uglifyify lib/main.js > dist/zxcvbn.js",
+    "build-dist": "make-dir dist && browserify --standalone zxcvbn -t uglifyify lib/index.js > dist/zxcvbn.js",
     "lint": "eslint"
   },
   "devDependencies": {
