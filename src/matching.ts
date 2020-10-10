@@ -225,14 +225,14 @@ export function dictionary_match(
     const ranked_dictionary = _ranked_dictionaries[dictionary_name];
     for (let i = 0; i < password.length; i++) {
       for (let j = i; j < password.length; j++) {
-        if (password_lower.slice(i, +j + 1 || undefined) in ranked_dictionary) {
-          const word = password_lower.slice(i, +j + 1 || undefined);
+        if (password_lower.slice(i, j + 1) in ranked_dictionary) {
+          const word = password_lower.slice(i, j + 1);
           const rank = ranked_dictionary[word];
           matches.push({
             pattern: "dictionary",
             i,
             j,
-            token: password.slice(i, +j + 1 || undefined),
+            token: password.slice(i, j + 1),
             matched_word: word,
             rank,
             dictionary_name,
@@ -251,25 +251,22 @@ export function reverse_dictionary_match(
   _ranked_dictionaries = RANKED_DICTIONARIES
 ): IDictionaryMatch[] {
   const reversed_password = password.split("").reverse().join("");
-  const matches = dictionary_match(reversed_password, _ranked_dictionaries);
-  for (const match of matches) {
-    match.token = match.token.split("").reverse().join(""); // reverse back
-    match.reversed = true;
-    // map coordinates back to original string
-    [match.i, match.j] = [
-      password.length - 1 - match.j,
-      password.length - 1 - match.i,
-    ];
-  }
-  return sorted(matches);
+  return dictionary_match(reversed_password, _ranked_dictionaries)
+    .map((m) => {
+      const newM = { ...m };
+      newM.i = password.length - 1 - m.j;
+      newM.j = password.length - 1 - m.i;
+      newM.token = m.token.split("").reverse().join(""); // reverse back
+      newM.reversed = true;
+      return newM;
+    })
+    .sort((m1, m2) => m1.i - m2.i || m1.j - m2.j);
 }
 
-export function set_user_input_dictionary(
-  ordered_list: string[]
-): Record<string, number> {
-  return (RANKED_DICTIONARIES["user_inputs"] = build_ranked_dictionary(
-    ordered_list.slice()
-  ));
+export function set_user_input_dictionary(ordered_list: string[]): void {
+  RANKED_DICTIONARIES["user_inputs"] = build_ranked_dictionary([
+    ...ordered_list,
+  ]);
 }
 
 //-------------------------------------------------------------------------------
@@ -281,15 +278,12 @@ export function relevant_l33t_subtable(
   password: string,
   table: Record<string, string[]>
 ): Record<string, string[]> {
-  const password_chars: { [index: string]: boolean } = {};
-  for (const chr of password.split("")) {
-    password_chars[chr] = true;
-  }
+  const password_chars = new Set(password.split(""));
   const subtable: Record<string, string[]> = {};
+
   for (const letter in table) {
-    const subs = table[letter];
-    const relevant_subs = subs.filter(
-      (sub) => sub != null && sub in password_chars
+    const relevant_subs = table[letter].filter((sub) =>
+      password_chars.has(sub)
     );
     if (relevant_subs.length > 0) {
       subtable[letter] = relevant_subs;
@@ -314,7 +308,7 @@ export function enumerate_l33t_subs(
         .sort()
         .map((k, v) => k + "," + v)
         .join("-");
-      if (!(label in members)) {
+      if (!members.has(label)) {
         members.add(label);
         deduped.push(sub);
       }
@@ -322,48 +316,33 @@ export function enumerate_l33t_subs(
     return deduped;
   };
 
-  const helper = function (keys: string[]): void {
-    if (!keys.length) {
-      return;
-    }
-    const first_key = keys[0];
-    const rest_keys = keys.slice(1);
+  function helper(keys: string[]): void {
+    if (!keys.length) return;
+
+    const [first_key, ...rest_keys] = keys;
     const next_subs: [string, string][][] = [];
     for (const l33t_chr of table[first_key]) {
       for (const sub of subs) {
-        let dup_l33t_index = -1;
-        for (let i = 0; i < sub.length; i++) {
-          if (sub[i][0] === l33t_chr) {
-            dup_l33t_index = i;
-            break;
-          }
-        }
-        if (dup_l33t_index === -1) {
-          const sub_extension = sub.concat([[l33t_chr, first_key]]);
-          next_subs.push(sub_extension);
-        } else {
-          const sub_alternative = sub.slice(0);
-          sub_alternative.splice(dup_l33t_index, 1);
-          sub_alternative.push([l33t_chr, first_key]);
-          next_subs.push(sub);
-          next_subs.push(sub_alternative);
-        }
+        const dup_l33t_index = sub.findIndex((s) => s[0] === l33t_chr);
+
+        if (dup_l33t_index !== -1) next_subs.push(sub);
+        next_subs.push([...sub, [l33t_chr, first_key]]);
       }
     }
+
     subs = dedup(next_subs);
     return helper(rest_keys);
-  };
+  }
 
   helper(keys);
-  const sub_dicts: Record<string, string>[] = []; // convert from assoc lists to dicts
-  for (const sub of subs) {
+
+  return subs.map((s) => {
     const sub_dictionary: Record<string, string> = {};
-    for (const [l33t_chr, chr] of sub) {
+    for (const [l33t_chr, chr] of s) {
       sub_dictionary[l33t_chr] = chr;
     }
-    sub_dicts.push(sub_dictionary);
-  }
-  return sub_dicts;
+    return sub_dictionary;
+  });
 }
 
 export function l33t_match(
@@ -371,20 +350,19 @@ export function l33t_match(
   _ranked_dictionaries = RANKED_DICTIONARIES,
   _l33t_table: Record<string, string[]> = L33T_TABLE
 ): IDictionaryMatch[] {
-  let token;
   const matches: IDictionaryMatch[] = [];
   for (const sub of enumerate_l33t_subs(
     relevant_l33t_subtable(password, _l33t_table)
   )) {
     if (empty(sub)) {
-      break;
-    } // corner case: password has no relevant subs.
+      break; // corner case: password has no relevant subs.
+    }
     const subbed_password = translate(password, sub);
     for (const match of dictionary_match(
       subbed_password,
       _ranked_dictionaries
     )) {
-      token = password.slice(match.i, +match.j + 1 || undefined);
+      const token = password.slice(match.i, match.j + 1);
       if (token.toLowerCase() === match.matched_word) {
         continue; // only return the matches that contain an actual substitution
       }
@@ -424,16 +402,17 @@ export function spatial_match(
   password: string,
   _graphs: Record<string, Record<string, (string | null)[]>> = GRAPHS
 ): ISpatialMatch[] {
-  const matches: ISpatialMatch[] = [];
-  for (const graph_name in _graphs) {
-    const graph = _graphs[graph_name];
-    for (const m of spatial_match_helper(password, graph, graph_name))
-      matches.push(m);
-  }
-  return sorted(matches);
+  return sorted(
+    ([] as ISpatialMatch[]).concat(
+      ...Object.keys(_graphs).map((graph_name) =>
+        spatial_match_helper(password, _graphs[graph_name], graph_name)
+      )
+    )
+  );
 }
 
 const SHIFTED_RX = /[~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>?]/;
+
 export function spatial_match_helper(
   password: string,
   graph: Record<string, (string | null)[]>,
@@ -463,7 +442,7 @@ export function spatial_match_helper(
       const adjacents = graph[prev_char] || [];
       // consider growing pattern by one character if j hasn't gone over the edge.
       if (j < password.length) {
-        const cur_char = password.charAt(j);
+        const cur_char = password[j];
         for (const adj of adjacents) {
           cur_direction += 1;
           if (adj && adj.indexOf(cur_char) !== -1) {
@@ -550,7 +529,8 @@ export function repeat_match(password: string): IRepeatMatch[] {
       match = lazy_match;
       base_token = match[1];
     }
-    const [i, j] = [match.index, match.index + match[0].length - 1];
+    const i = match.index;
+    const j = match.index + match[0].length - 1;
     // recursively match and score the base string
     const base_analysis = most_guessable_match_sequence(
       base_token,
@@ -597,7 +577,7 @@ export function sequence_match(password: string): ISequenceMatch[] {
       const middle = Math.abs(delta);
       if (0 < middle && middle <= MAX_DELTA) {
         let sequence_name, sequence_space;
-        const token = password.slice(i, +j + 1 || undefined);
+        const token = password.slice(i, j + 1);
         if (/^[a-z]+$/.test(token)) {
           sequence_name = "lower";
           sequence_space = 26;
@@ -617,7 +597,7 @@ export function sequence_match(password: string): ISequenceMatch[] {
           pattern: "sequence",
           i,
           j,
-          token: password.slice(i, +j + 1 || undefined),
+          token: password.slice(i, j + 1),
           sequence_name,
           sequence_space,
           ascending: delta > 0,
@@ -717,7 +697,7 @@ $\
       if (j >= password.length) {
         break;
       }
-      token = password.slice(i, +j + 1 || undefined);
+      token = password.slice(i, j + 1);
       if (!maybe_date_no_separator.exec(token)) {
         continue;
       }
@@ -732,26 +712,24 @@ $\
           candidates.push(dmy);
         }
       }
-      if (!(candidates.length > 0)) {
-        continue;
-      }
+      if (!(candidates.length > 0)) continue;
+
       // at this point: different possible dmy mappings for the same i,j substring.
       // match the candidate date that likely takes the fewest guesses: a year closest to 2000.
       // (scoring.REFERENCE_YEAR).
       //
       // ie, considering '111504', prefer 11-15-04 to 1-1-1504
       // (interpreting '04' as 2004)
-      let best_candidate = candidates[0];
+      const [first, ...rest] = candidates;
+      let best_candidate = first;
       const metric = (candidate: IDMY) =>
         Math.abs(candidate.year - REFERENCE_YEAR);
       let min_distance = metric(candidates[0]);
-      for (const candidate of candidates.slice(1)) {
+      for (const candidate of rest) {
         const distance = metric(candidate);
         if (distance < min_distance) {
-          [best_candidate, min_distance] = [candidate, distance] as [
-            IDMY,
-            number
-          ];
+          best_candidate = candidate;
+          min_distance = distance;
         }
       }
       matches.push({
@@ -760,9 +738,7 @@ $\
         i,
         j,
         separator: "",
-        year: best_candidate.year,
-        month: best_candidate.month,
-        day: best_candidate.day,
+        ...best_candidate,
       });
     }
   }
@@ -770,31 +746,26 @@ $\
   // dates with separators are between length 6 '1/1/91' and 10 '11/11/1991'
   for (let i = 0; i < password.length; i++) {
     for (let j = i + 5; j <= i + 9; j++) {
-      if (j >= password.length) {
-        break;
-      }
+      if (j >= password.length) break;
+
       token = password.slice(i, +j + 1 || undefined);
       const rx_match = maybe_date_with_separator.exec(token);
-      if (!rx_match) {
-        continue;
-      }
+      if (!rx_match) continue;
+
       dmy = map_ints_to_dmy([
         parseInt(rx_match[1]),
         parseInt(rx_match[3]),
         parseInt(rx_match[4]),
       ]);
-      if (!dmy) {
-        continue;
-      }
+      if (!dmy) continue;
+
       matches.push({
         pattern: "date",
         token,
         i,
         j,
         separator: rx_match[2],
-        year: dmy.year,
-        month: dmy.month,
-        day: dmy.day,
+        ...dmy,
       });
     }
   }
@@ -810,9 +781,8 @@ $\
     matches.filter(function (match) {
       let is_submatch = false;
       for (const other_match of matches) {
-        if (match === other_match) {
-          continue;
-        }
+        if (match === other_match) continue;
+
         if (other_match.i <= match.i && other_match.j >= match.j) {
           is_submatch = true;
           break;
@@ -832,7 +802,6 @@ export function map_ints_to_dmy(ints: number[]): IDMY | undefined {
   //   2 ints are over 31, the max allowable day
   //   2 ints are zero
   //   all ints are over 12, the max allowable month
-  let dm, rest, y;
   if (ints[1] > 31 || ints[1] <= 0) {
     return;
   }
@@ -859,17 +828,16 @@ export function map_ints_to_dmy(ints: number[]): IDMY | undefined {
 
   // first look for a four digit year: yyyy + daymonth or daymonth + yyyy
   const possible_year_splits = [
-    [ints[2], ints.slice(0, 2)], // year last
-    [ints[0], ints.slice(1, 3)], // year first
-  ] as [number, number[]][];
-  for ([y, rest] of possible_year_splits) {
-    if (DATE_MIN_YEAR <= y && y <= DATE_MAX_YEAR) {
-      dm = map_ints_to_dm(rest);
+    { year: ints[2], rest: ints.slice(0, 2) },
+    { year: ints[0], rest: ints.slice(1, 3) },
+  ];
+  for (const { year, rest } of possible_year_splits) {
+    if (DATE_MIN_YEAR <= year && year <= DATE_MAX_YEAR) {
+      const dm = map_ints_to_dm(rest);
       if (dm) {
         return {
-          year: y,
-          month: dm.month,
-          day: dm.day,
+          year,
+          ...dm,
         };
       } else {
         // for a candidate that includes a four-digit year,
@@ -882,21 +850,19 @@ export function map_ints_to_dmy(ints: number[]): IDMY | undefined {
 
   // given no four-digit year, two digit years are the most flexible int to match, so
   // try to parse a day-month out of ints[0..1] or ints[1..0]
-  for ([y, rest] of possible_year_splits) {
-    dm = map_ints_to_dm(rest);
+  for (const { year: y, rest } of possible_year_splits) {
+    const dm = map_ints_to_dm(rest);
     if (dm) {
-      y = two_to_four_digit_year(y);
       return {
-        year: y,
-        month: dm.month,
-        day: dm.day,
+        year: two_to_four_digit_year(y),
+        ...dm,
       };
     }
   }
 }
 
 export function map_ints_to_dm(ints: number[]): IDM | undefined {
-  for (const [d, m] of [ints, ints.slice().reverse()]) {
+  for (const [d, m] of [ints, [...ints].reverse()]) {
     if (1 <= d && d <= 31 && 1 <= m && m <= 12) {
       return {
         day: d,

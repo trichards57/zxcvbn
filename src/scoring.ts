@@ -1,3 +1,4 @@
+import { keypad, qwerty } from "./adjacency_graphs";
 import {
   IAnyMatch,
   IBruteForceMatch,
@@ -8,7 +9,6 @@ import {
   ISequenceMatch,
   ISpatialMatch,
 } from "./matching";
-import * as adjacency_graphs from "./adjacency_graphs";
 
 // on qwerty, 'g' has degree 6, being adjacent to 'ftyhbv'. '\' has degree 1.
 // this calculates the average over all keys.
@@ -394,16 +394,13 @@ export function date_guesses(match: IDateMatch): number {
   return guesses;
 }
 
-export const KEYBOARD_AVERAGE_DEGREE = calc_average_degree(
-  adjacency_graphs.qwerty
-);
+export const KEYBOARD_AVERAGE_DEGREE = calc_average_degree(qwerty);
 // slightly different for keypad/mac keypad, but close enough
-const KEYPAD_AVERAGE_DEGREE = calc_average_degree(adjacency_graphs.keypad);
+const KEYPAD_AVERAGE_DEGREE = calc_average_degree(keypad);
 
-export const KEYBOARD_STARTING_POSITIONS = Object.keys(adjacency_graphs.qwerty)
-  .length;
+export const KEYBOARD_STARTING_POSITIONS = Object.keys(qwerty).length;
 
-const KEYPAD_STARTING_POSITIONS = Object.keys(adjacency_graphs.keypad).length;
+const KEYPAD_STARTING_POSITIONS = Object.keys(keypad).length;
 
 export function spatial_guesses(match: ISpatialMatch): number {
   let d, s;
