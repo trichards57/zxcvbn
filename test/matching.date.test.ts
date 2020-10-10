@@ -27,7 +27,9 @@ describe("matching", () => {
     it("matches dates with varied element order", () => {
       // TODO : Fix this test
       for (const order of ["mdy", "dmy", "ymd", "ydm"]) {
-        const [d, m, y] = Array.from([8, 8, 88]);
+        const d = 8;
+        const m = 8;
+        const y = 88;
         const password = order
           .replace("y", y.toString())
           .replace("m", m.toString())
