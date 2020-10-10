@@ -1,11 +1,11 @@
 {
-  "name": "zxcvbn",
-  "version": "4.4.2",
-  "description": "realistic password strength estimation",
-  "author": "Dan Wheeler",
+  "name": "zxcvbn-typescript",
+  "version": "5.0.0-beta-1",
+  "description": "realistic password strength estimation, updated and ported to Typescript from Dan Wheeler's zxcvbn",
+  "author": "Tony Richards",
   "license": "MIT",
   "main": "lib/main.js",
-  "repository": "dropbox/zxcvbn",
+  "repository": "trichards57/zxcvbn",
   "scripts": {
     "test": "jest",
     "test-saucelabs": "zuul -- test/*.ts",
