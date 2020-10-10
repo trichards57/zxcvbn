@@ -3,8 +3,8 @@ import {
   IDictionaryMatch,
   reverse_dictionary_match,
   set_user_input_dictionary,
-} from "../src/matching/dictionary_match";
-import { generatePasswords } from "./test-support";
+} from "../../src/matching/dictionary_match";
+import { generatePasswords } from "../test-support";
 
 const test_dicts: Record<string, Record<string, number>> = {
   d1: {

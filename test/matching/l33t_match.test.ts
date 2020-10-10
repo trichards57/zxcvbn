@@ -3,7 +3,7 @@ import {
   IDictionaryMatch,
   l33t_match,
   relevant_l33t_subtable,
-} from "../src/matching/dictionary_match";
+} from "../../src/matching/dictionary_match";
 
 const test_table = {
   a: ["4", "@"],

@@ -1,6 +1,6 @@
-import { IRepeatMatch, repeat_match } from "../src/matching/repeat_match";
-import { log10 } from "../src/scoring";
-import { generatePasswords } from "./test-support";
+import { IRepeatMatch, repeat_match } from "../../src/matching/repeat_match";
+import { log10 } from "../../src/scoring";
+import { generatePasswords } from "../test-support";
 
 describe("matching", () => {
   describe("repeat_match", () => {

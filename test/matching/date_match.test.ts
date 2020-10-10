@@ -1,5 +1,5 @@
-import { date_match, IDateMatch } from "../src/matching/date_match";
-import { generatePasswords } from "./test-support";
+import { date_match, IDateMatch } from "../../src/matching/date_match";
+import { generatePasswords } from "../test-support";
 
 describe("matching", () => {
   describe("date_match", () => {

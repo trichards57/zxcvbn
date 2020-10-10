@@ -1,4 +1,4 @@
-import { IRegexMatch, regex_match } from "../src/matching/regex_match";
+import { IRegexMatch, regex_match } from "../../src/matching/regex_match";
 
 describe("matching", () => {
   describe("regex_match", () => {

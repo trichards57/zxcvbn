@@ -1,5 +1,5 @@
-import { ISequenceMatch, sequence_match } from "../src/matching/sequence_match";
-import { generatePasswords } from "./test-support";
+import { ISequenceMatch, sequence_match } from "../../src/matching/sequence_match";
+import { generatePasswords } from "../test-support";
 
 describe("matching", () => {
   describe("sequence_match", () => {

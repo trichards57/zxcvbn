@@ -1,4 +1,4 @@
-import { empty, mod, sorted, translate } from "../src/matching/support";
+import { empty, mod, sorted, translate } from "../../src/matching/support";
 
 describe("matching support", () => {
   describe("empty", () => {

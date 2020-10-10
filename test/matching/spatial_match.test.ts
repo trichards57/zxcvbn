@@ -1,5 +1,5 @@
-import { dvorak, keypad, mac_keypad, qwerty } from "../src/adjacency_graphs";
-import { ISpatialMatch, spatial_match } from "../src/matching/spatial_match";
+import { dvorak, keypad, mac_keypad, qwerty } from "../../src/adjacency_graphs";
+import { ISpatialMatch, spatial_match } from "../../src/matching/spatial_match";
 
 const testGraphs = {
   qwerty: qwerty,
