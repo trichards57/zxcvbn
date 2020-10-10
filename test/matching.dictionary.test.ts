@@ -4,6 +4,7 @@ import {
   reverse_dictionary_match,
   set_user_input_dictionary,
 } from "../src/matching";
+import { generatePasswords } from "./test-support";
 
 const test_dicts: Record<string, Record<string, number>> = {
   d1: {
@@ -21,30 +22,6 @@ const test_dicts: Record<string, Record<string, number>> = {
     "asdf1234&*": 5,
   },
 };
-
-interface IPassword {
-  password: string;
-  i: number;
-  j: number;
-}
-
-function generatePasswords(
-  pattern: string,
-  prefixes: string[],
-  suffixes: string[]
-): IPassword[] {
-  const result: IPassword[] = [];
-  for (const prefix of prefixes) {
-    for (const suffix of suffixes) {
-      result.push({
-        password: prefix + pattern + suffix,
-        i: prefix.length,
-        j: prefix.length + pattern.length - 1,
-      });
-    }
-  }
-  return result;
-}
 
 describe("matching", () => {
   describe("dictionary_match", () => {
