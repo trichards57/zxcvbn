@@ -1,15 +1,15 @@
-import { IMatch, sorted } from "./matching/support";
+import { IMatch, sorted } from "./support";
 import {
   dictionary_match,
   IDictionaryMatch,
   l33t_match,
   reverse_dictionary_match,
-} from "./matching/dictionary_match";
-import { ISpatialMatch, spatial_match } from "./matching/spatial_match";
-import { IRepeatMatch, repeat_match } from "./matching/repeat_match";
-import { ISequenceMatch, sequence_match } from "./matching/sequence_match";
-import { IRegexMatch, regex_match } from "./matching/regex_match";
-import { date_match, IDateMatch } from "./matching/date_match";
+} from "./dictionary_match";
+import { ISpatialMatch, spatial_match } from "./spatial_match";
+import { IRepeatMatch, repeat_match } from "./repeat_match";
+import { ISequenceMatch, sequence_match } from "./sequence_match";
+import { IRegexMatch, regex_match } from "./regex_match";
+import { date_match, IDateMatch } from "./date_match";
 
 export interface IBruteForceMatch extends IMatch {
   pattern: "bruteforce";
