@@ -1,6 +1,6 @@
 import frequency_lists from "./frequency_lists";
 import * as adjacency_graphs from "./adjacency_graphs";
-import * as scoring from "./scoring";
+import { most_guessable_match_sequence, REFERENCE_YEAR } from "./scoring";
 
 interface IDM {
   day: number;
@@ -552,7 +552,7 @@ export function repeat_match(password: string): IRepeatMatch[] {
     }
     const [i, j] = [match.index, match.index + match[0].length - 1];
     // recursively match and score the base string
-    const base_analysis = scoring.most_guessable_match_sequence(
+    const base_analysis = most_guessable_match_sequence(
       base_token,
       omnimatch(base_token)
     );
@@ -743,7 +743,7 @@ $\
       // (interpreting '04' as 2004)
       let best_candidate = candidates[0];
       const metric = (candidate: IDMY) =>
-        Math.abs(candidate.year - scoring.REFERENCE_YEAR);
+        Math.abs(candidate.year - REFERENCE_YEAR);
       let min_distance = metric(candidates[0]);
       for (const candidate of candidates.slice(1)) {
         const distance = metric(candidate);

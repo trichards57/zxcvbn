@@ -1,5 +1,5 @@
-import * as scoring from "./scoring";
 import { IAnyMatch, IDictionaryMatch } from "./matching";
+import { ALL_UPPER, START_UPPER } from "./scoring";
 
 export interface IFeedbackItem {
   warning: string;
@@ -136,9 +136,9 @@ export function get_dictionary_match_feedback(
 
   const suggestions: string[] = [];
   const word = match.token;
-  if (word.match(scoring.START_UPPER)) {
+  if (word.match(START_UPPER)) {
     suggestions.push("Capitalization doesn't help very much");
-  } else if (word.match(scoring.ALL_UPPER) && word.toLowerCase() !== word) {
+  } else if (word.match(ALL_UPPER) && word.toLowerCase() !== word) {
     suggestions.push(
       "All-uppercase is almost as easy to guess as all-lowercase"
     );
