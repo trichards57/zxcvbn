@@ -1,9 +1,7 @@
-import * as matching from "./matching";
-import { IAnyMatch } from "./matching";
-import * as scoring from "./scoring";
-import time_estimates, { IAttackTimes } from "./time_estimates";
-import * as feedback from "./feedback";
-import { IFeedbackItem } from "./feedback";
+import { IAnyMatch, omnimatch, set_user_input_dictionary } from "./matching";
+import { estimate_attack_times, IAttackTimes } from "./time_estimates";
+import { get_feedback, IFeedbackItem } from "./feedback";
+import { most_guessable_match_sequence } from "./scoring";
 
 const time = () => new Date().getTime();
 
@@ -29,13 +27,13 @@ export default function zxcvbn(
       sanitized_inputs.push(arg.toString().toLowerCase());
     }
   }
-  matching.set_user_input_dictionary(sanitized_inputs);
+  set_user_input_dictionary(sanitized_inputs);
 
-  const matches = matching.omnimatch(password);
-  const result = scoring.most_guessable_match_sequence(password, matches);
+  const matches = omnimatch(password);
+  const result = most_guessable_match_sequence(password, matches);
   const calc_time = time() - start;
-  const attack_times = time_estimates.estimate_attack_times(result.guesses);
-  const fb = feedback.get_feedback(result.score, result.sequence);
+  const attack_times = estimate_attack_times(result.guesses);
+  const fb = get_feedback(result.score, result.sequence);
 
   return { ...result, ...attack_times, calc_time, fb };
 }
