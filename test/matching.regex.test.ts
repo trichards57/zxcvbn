@@ -1,7 +1,7 @@
 import { IRegexMatch, REGEXEN, regex_match } from "../src/matching";
 
 describe("matching", () => {
-  describe("sequence_match", () => {
+  describe("regex_match", () => {
     it("matches recent years pattern", () => {
       for (const [pattern, name] of [
         ["1922", "recent_year"],

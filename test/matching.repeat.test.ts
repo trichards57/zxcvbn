@@ -3,7 +3,7 @@ import { log10 } from "../src/scoring";
 import { generatePasswords } from "./test-support";
 
 describe("matching", () => {
-  describe("sequence_match", () => {
+  describe("repeat_match", () => {
     it("doesn't matching empty or 1-character repeat patterns", () => {
       for (const password of ["", "#"]) {
         const expected: IAnyMatch[] = [];
