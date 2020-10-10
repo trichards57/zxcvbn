@@ -99,7 +99,7 @@ export type IAnyMatch =
   | IDateMatch
   | IBruteForceMatch;
 
-function build_ranked_dict(ordered_list: string[]) {
+function build_ranked_dictionary(ordered_list: string[]) {
   const result: Record<string, number> = {};
   let i = 1; // rank starts at 1, not 0
   for (const word of ordered_list) {
@@ -113,7 +113,7 @@ const RANKED_DICTIONARIES: Record<string, Record<string, number>> = {};
 
 for (const name in frequency_lists) {
   const lst = frequency_lists[name];
-  RANKED_DICTIONARIES[name] = build_ranked_dict(lst);
+  RANKED_DICTIONARIES[name] = build_ranked_dictionary(lst);
 }
 
 const GRAPHS = {
@@ -135,7 +135,7 @@ const L33T_TABLE = {
   z: ["2"],
 };
 
-export const REGEXEN = { recent_year: /19\d\d|200\d|201\d/g };
+export const REGEX_EN = { recent_year: /19\d\d|200\d|201\d/g };
 
 const DATE_MAX_YEAR = 2050;
 const DATE_MIN_YEAR = 1000;
@@ -222,12 +222,12 @@ export function dictionary_match(
   const matches: IDictionaryMatch[] = [];
   const password_lower = password.toLowerCase();
   for (const dictionary_name in _ranked_dictionaries) {
-    const ranked_dict = _ranked_dictionaries[dictionary_name];
+    const ranked_dictionary = _ranked_dictionaries[dictionary_name];
     for (let i = 0; i < password.length; i++) {
       for (let j = i; j < password.length; j++) {
-        if (password_lower.slice(i, +j + 1 || undefined) in ranked_dict) {
+        if (password_lower.slice(i, +j + 1 || undefined) in ranked_dictionary) {
           const word = password_lower.slice(i, +j + 1 || undefined);
-          const rank = ranked_dict[word];
+          const rank = ranked_dictionary[word];
           matches.push({
             pattern: "dictionary",
             i,
@@ -267,7 +267,7 @@ export function reverse_dictionary_match(
 export function set_user_input_dictionary(
   ordered_list: string[]
 ): Record<string, number> {
-  return (RANKED_DICTIONARIES["user_inputs"] = build_ranked_dict(
+  return (RANKED_DICTIONARIES["user_inputs"] = build_ranked_dictionary(
     ordered_list.slice()
   ));
 }
@@ -357,11 +357,11 @@ export function enumerate_l33t_subs(
   helper(keys);
   const sub_dicts: Record<string, string>[] = []; // convert from assoc lists to dicts
   for (const sub of subs) {
-    const sub_dict: Record<string, string> = {};
+    const sub_dictionary: Record<string, string> = {};
     for (const [l33t_chr, chr] of sub) {
-      sub_dict[l33t_chr] = chr;
+      sub_dictionary[l33t_chr] = chr;
     }
-    sub_dicts.push(sub_dict);
+    sub_dicts.push(sub_dictionary);
   }
   return sub_dicts;
 }
@@ -575,7 +575,7 @@ export function repeat_match(password: string): IRepeatMatch[] {
 
 const MAX_DELTA = 5;
 export function sequence_match(password: string): ISequenceMatch[] {
-  // Identifies sequences by looking for repeated differences in unicode codepoint.
+  // Identifies sequences by looking for repeated differences in unicode code point.
   // this allows skipping, such as 9753, and also matches some extended unicode sequences
   // such as Greek and Cyrillic alphabets.
   //
@@ -653,7 +653,7 @@ export function sequence_match(password: string): ISequenceMatch[] {
 
 export function regex_match(
   password: string,
-  _regexen: Record<string, RegExp> = REGEXEN
+  _regexen: Record<string, RegExp> = REGEX_EN
 ): IRegexMatch[] {
   const matches: IRegexMatch[] = [];
   for (const name in _regexen) {

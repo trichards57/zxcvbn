@@ -1,4 +1,4 @@
-import { IRegexMatch, REGEXEN, regex_match } from "../src/matching";
+import { IRegexMatch, REGEX_EN, regex_match } from "../src/matching";
 
 describe("matching", () => {
   describe("regex_match", () => {
@@ -13,7 +13,7 @@ describe("matching", () => {
             j: pattern.length - 1,
             pattern: "regex",
             regex_match:
-              REGEXEN.recent_year.exec(pattern) ||
+              REGEX_EN.recent_year.exec(pattern) ||
               (([] as unknown) as RegExpExecArray),
             regex_name: name,
             token: pattern,
