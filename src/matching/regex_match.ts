@@ -15,10 +15,10 @@ export function regex_match(
 ): IRegexMatch[] {
   const matches: IRegexMatch[] = [];
   for (const name in _regexen) {
-    let rx_match: RegExpExecArray | null;
     const regex = _regexen[name];
     regex.lastIndex = 0; // keeps regex_match stateless
-    while ((rx_match = regex.exec(password))) {
+    let rx_match = regex.exec(password);
+    while (rx_match !== null) {
       const token = rx_match[0];
       matches.push({
         pattern: "regex",
@@ -28,6 +28,7 @@ export function regex_match(
         regex_name: name,
         regex_match: rx_match,
       });
+      rx_match = regex.exec(password);
     }
   }
   return sorted(matches);
