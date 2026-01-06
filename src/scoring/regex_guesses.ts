@@ -7,7 +7,9 @@ export function regex_guesses(match: IRegexMatch): number {
     case "recent_year":
       // conservative estimate of year space: num years from REFERENCE_YEAR.
       // if year is close to REFERENCE_YEAR, estimate a year space of MIN_YEAR_SPACE.
-      year_space = Math.abs(parseInt(match.regex_match[0], 10) - REFERENCE_YEAR);
+      year_space = Math.abs(
+        parseInt(match.regex_match[0], 10) - REFERENCE_YEAR,
+      );
       year_space = Math.max(year_space, MIN_YEAR_SPACE);
       return year_space;
   }

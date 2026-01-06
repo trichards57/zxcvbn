@@ -4,7 +4,6 @@ import { set_user_input_dictionary } from "./matching/dictionary_match";
 import { most_guessable_match_sequence } from "./scoring";
 import { estimate_attack_times, type IAttackTimes } from "./time_estimates";
 
-
 export interface IZXCVBNResult extends IAttackTimes {
   sequence: IAnyMatch[];
   guesses: number;

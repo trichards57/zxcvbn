@@ -90,7 +90,7 @@ export function date_match(password: string): IDateMatch[] {
             parseInt(token.slice(0, k), 10),
             parseInt(token.slice(k, l), 10),
             parseInt(token.slice(l), 10),
-          ])
+          ]),
         )
         .filter((d) => d) as IDMY[];
       if (!(candidates.length > 0)) continue;
@@ -165,7 +165,7 @@ export function date_match(password: string): IDateMatch[] {
         }
       }
       return !is_submatch;
-    })
+    }),
   );
 }
 
