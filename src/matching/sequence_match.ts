@@ -14,7 +14,7 @@ function update(
   i: number,
   j: number,
   result: ISequenceMatch[],
-  delta: number,
+  delta: number
 ) {
   if (j - i > 1 || Math.abs(delta) === 1) {
     const middle = Math.abs(delta);
