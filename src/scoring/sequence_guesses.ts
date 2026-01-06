@@ -1,7 +1,7 @@
 import type { ISequenceMatch } from "../matching/sequence_match";
 
 export function sequence_guesses(match: ISequenceMatch): number {
-  let base_guesses;
+  let base_guesses: number;
   const first_chr = match.token.charAt(0);
   // lower guesses for obvious starting points
   if (["a", "A", "z", "Z", "0", "1", "9"].includes(first_chr)) {

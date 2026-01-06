@@ -178,7 +178,7 @@ export function most_guessable_match_sequence(
   password: string;
   score: number;
 } {
-  let guesses, m: IAnyMatch;
+  let guesses: number, m: IAnyMatch;
   const n = password.length;
 
   // partition matches into sublists according to ending index j

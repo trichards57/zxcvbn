@@ -19,7 +19,7 @@ function update(
   if (j - i > 1 || Math.abs(delta) === 1) {
     const middle = Math.abs(delta);
     if (0 < middle && middle <= MAX_DELTA) {
-      let sequence_name, sequence_space;
+      let sequence_name: string, sequence_space: number;
       const token = password.slice(i, j + 1);
       if (/^[a-z]+$/.test(token)) {
         sequence_name = "lower";
