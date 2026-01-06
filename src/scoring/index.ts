@@ -25,7 +25,7 @@ function update(
   },
   m: IAnyMatch,
   l: number,
-  exclude_additive: boolean,
+  exclude_additive: boolean
 ) {
   const k = m.j;
   let pi = estimate_guesses(m, password);
@@ -66,7 +66,7 @@ function unwind(
     pi: Record<number, number>[];
     g: Record<number, number>[];
   },
-  n: number,
+  n: number
 ) {
   const optimal_match_sequence: IAnyMatch[] = [];
   let k = n - 1;
@@ -99,7 +99,7 @@ function bruteforce_update(
     g: Record<number, number>[];
   },
   k: number,
-  exclude_additive: boolean,
+  exclude_additive: boolean
 ) {
   // see if a single bruteforce match spanning the k-prefix is optimal.
   const m = make_bruteforce_match(password, 0, k);
@@ -124,7 +124,7 @@ function bruteforce_update(
 function make_bruteforce_match(
   password: string,
   i: number,
-  j: number,
+  j: number
 ): IBruteForceMatch {
   return {
     pattern: "bruteforce",
@@ -170,7 +170,7 @@ function make_bruteforce_match(
 export function most_guessable_match_sequence(
   password: string,
   matches: IAnyMatch[],
-  _exclude_additive = false,
+  _exclude_additive = false
 ): {
   sequence: IAnyMatch[];
   guesses: number;
