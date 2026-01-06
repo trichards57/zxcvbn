@@ -18,7 +18,7 @@ describe("scoring", () => {
       ] as [string, string, number][]) {
         const base_guesses = most_guessable_match_sequence(
           base_token,
-          omnimatch(base_token)
+          omnimatch(base_token),
         ).guesses;
         const match: IRepeatMatch = {
           token,
@@ -43,7 +43,7 @@ describe("scoring", () => {
       const repeat_count = 2;
       const base_guesses = most_guessable_match_sequence(
         baseToken,
-        omnimatch(baseToken)
+        omnimatch(baseToken),
       ).guesses;
       const match: IRepeatMatch = {
         token,

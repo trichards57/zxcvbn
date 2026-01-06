@@ -97,14 +97,14 @@ describe("scoring", () => {
       const result1 = most_guessable_match_sequence(
         password,
         [worseMatch, bestMatch],
-        true
+        true,
       );
       expect(result1.sequence).toMatchObject([worseMatch]);
 
       const result2 = most_guessable_match_sequence(
         password,
         [bestMatch, worseMatch],
-        true
+        true,
       );
       expect(result2.sequence).toMatchObject([worseMatch]);
     });
@@ -118,7 +118,7 @@ describe("scoring", () => {
       const result = most_guessable_match_sequence(
         password,
         [m0, m1, m2],
-        true
+        true,
       );
 
       expect(result.guesses).toBe(3);
@@ -134,7 +134,7 @@ describe("scoring", () => {
       const result = most_guessable_match_sequence(
         password,
         [m0, m1, m2],
-        true
+        true,
       );
 
       expect(result.guesses).toBe(4);

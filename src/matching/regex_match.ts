@@ -11,7 +11,7 @@ export interface IRegexMatch extends IMatch {
 
 export function regex_match(
   password: string,
-  _regexen: Record<string, RegExp> = { recent_year: /19\d\d|200\d|201\d/g }
+  _regexen: Record<string, RegExp> = { recent_year: /19\d\d|200\d|201\d/g },
 ): IRegexMatch[] {
   const matches: IRegexMatch[] = [];
   for (const name in _regexen) {

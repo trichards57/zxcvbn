@@ -24,7 +24,7 @@ export function empty(obj: Record<string, unknown> | unknown[]): boolean {
 
 export function translate(
   string: string,
-  chr_map: Record<string, string>
+  chr_map: Record<string, string>,
 ): string {
   return string
     .split("")

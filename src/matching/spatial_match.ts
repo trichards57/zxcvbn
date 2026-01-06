@@ -17,14 +17,14 @@ export function spatial_match(
   password: string,
   _graphs: Record<string, Record<string, (string | null)[]>> = {
     ...adjacency_graphs,
-  }
+  },
 ): ISpatialMatch[] {
   return sorted(
     ([] as ISpatialMatch[]).concat(
       ...Object.keys(_graphs).map((graph_name) =>
-        spatial_match_helper(password, _graphs[graph_name], graph_name)
-      )
-    )
+        spatial_match_helper(password, _graphs[graph_name], graph_name),
+      ),
+    ),
   );
 }
 
@@ -33,7 +33,7 @@ const SHIFTED_RX = /[~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>?]/;
 export function spatial_match_helper(
   password: string,
   graph: Record<string, (string | null)[] | undefined>,
-  graph_name: string
+  graph_name: string,
 ): ISpatialMatch[] {
   const matches: ISpatialMatch[] = [];
   let i = 0;

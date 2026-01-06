@@ -17,7 +17,7 @@ export const default_feedback: IFeedbackItem = {
 
 export function get_feedback(
   score: number,
-  sequence: IAnyMatch[]
+  sequence: IAnyMatch[],
 ): IFeedbackItem {
   // starting feedback
   if (sequence.length === 0) return default_feedback;
@@ -53,7 +53,7 @@ export function get_feedback(
 
 export function get_match_feedback(
   match: IAnyMatch,
-  is_sole_match: boolean
+  is_sole_match: boolean,
 ): IFeedbackItem | undefined {
   switch (match.pattern) {
     case "dictionary":
@@ -106,7 +106,7 @@ export function get_match_feedback(
 
 export function get_dictionary_match_feedback(
   match: IDictionaryMatch,
-  is_sole_match: boolean
+  is_sole_match: boolean,
 ): IFeedbackItem {
   let warning = "";
 
@@ -142,7 +142,7 @@ export function get_dictionary_match_feedback(
     suggestions.push("Capitalization doesn't help very much");
   } else if (word.match(ALL_UPPER) && word.toLowerCase() !== word) {
     suggestions.push(
-      "All-uppercase is almost as easy to guess as all-lowercase"
+      "All-uppercase is almost as easy to guess as all-lowercase",
     );
   }
 
@@ -151,7 +151,7 @@ export function get_dictionary_match_feedback(
   }
   if (match.l33t) {
     suggestions.push(
-      "Predictable substitutions like '@' instead of 'a' don't help very much"
+      "Predictable substitutions like '@' instead of 'a' don't help very much",
     );
   }
 

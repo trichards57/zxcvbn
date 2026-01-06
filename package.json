@@ -6,10 +6,7 @@
   "license": "MIT",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
-  "files": [
-    "lib",
-    "dist"
-  ],
+  "files": ["lib", "dist"],
   "repository": {
     "type": "git",
     "url": "https://github.com/trichards57/zxcvbn"

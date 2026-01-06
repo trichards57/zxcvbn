@@ -52,7 +52,7 @@ export function repeat_match(password: string): IRepeatMatch[] {
     // recursively match and score the base string
     const base_analysis = most_guessable_match_sequence(
       base_token,
-      omnimatch(base_token)
+      omnimatch(base_token),
     );
     const base_matches = base_analysis.sequence;
     const base_guesses = base_analysis.guesses;
