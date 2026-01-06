@@ -23,7 +23,7 @@ function calc_average_degree(graph: Record<string, (string | null)[]>) {
 }
 
 export function spatial_guesses(match: ISpatialMatch): number {
-  let d, s;
+  let d: number, s: number;
   if (["qwerty", "dvorak"].includes(match.graph)) {
     s = KEYBOARD_STARTING_POSITIONS;
     d = KEYBOARD_AVERAGE_DEGREE;
