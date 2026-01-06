@@ -14,7 +14,8 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
-    "isolatedDeclarations": true
+    "isolatedDeclarations": true,
+    "types": ["vitest/globals"]
   },
   "include": ["src"],
   "typedocOptions": {
