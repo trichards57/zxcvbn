@@ -4,15 +4,13 @@
   "description": "realistic password strength estimation, updated and ported to Typescript from Dan Wheeler's zxcvbn",
   "author": "Tony Richards",
   "license": "MIT",
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "types": "./dist/index.d.ts",
   "files": [
-    "lib",
     "dist"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/trichards57/zxcvbn"
+    "url": "git+https://github.com/trichards57/zxcvbn.git"
   },
   "bugs": "https://github.com/trichards57/zxcvbn/issues",
   "contributors": [
@@ -23,27 +21,21 @@
   "scripts": {
     "test": "jest",
     "test:ci": "jest --coverage && coveralls < coverage/lcov.info",
-    "build": "npm run build-lib && npm run build-dist",
-    "build-lib": "tsc",
-    "build-dist": "make-dir dist && browserify --standalone zxcvbn -t uglifyify lib/index.js > dist/zxcvbn.js",
+    "build": "tsdown --minify",
     "check": "biome check",
     "check:fix": "biome check --write",
-    "prepublishOnly": "npm run build",
-    "commit": "cz"
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.11",
     "@types/jest": "^30.0.0",
-    "browserify": "^17.0.0",
-    "commitizen": "^4.2.3",
-    "coveralls": "^3.1.0",
-    "cz-conventional-changelog": "^3.3.0",
     "jest": "^30.2.0",
-    "make-dir-cli": "^4.0.0",
+    "publint": "^0.3.16",
     "ts-jest": "^29.4.6",
-    "typescript": "^5.9.3",
-    "uglifyify": "^5.0.2"
+    "tsdown": "^0.19.0-beta.3",
+    "typescript": "^5.9.3"
   },
+  "type": "module",
   "keywords": [
     "password",
     "passphrase",
@@ -64,18 +56,11 @@
       "path": "./node_modules/cz-conventional-changelog"
     }
   },
-  "overrides": {
-    "commitizen": {
-      "minimist": "1.2.6"
-    },
-    "coveralls": {
-      "minimist": "1.2.6"
-    },
-    "subarg": {
-      "minimist": "1.2.6"
-    }
-  },
   "browserslist": [
     "baseline widely available"
-  ]
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  }
 }
