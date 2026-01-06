@@ -44,7 +44,7 @@ for (const name in frequency_lists) {
  */
 export function dictionary_match(
   password: string,
-  _ranked_dictionaries = RANKED_DICTIONARIES
+  _ranked_dictionaries = RANKED_DICTIONARIES,
 ): IDictionaryMatch[] {
   const matches: IDictionaryMatch[] = [];
   const password_lower = password.toLowerCase();
@@ -81,7 +81,7 @@ export function dictionary_match(
  */
 export function reverse_dictionary_match(
   password: string,
-  _ranked_dictionaries = RANKED_DICTIONARIES
+  _ranked_dictionaries = RANKED_DICTIONARIES,
 ): IDictionaryMatch[] {
   const reversed_password = password.split("").reverse().join("");
   return dictionary_match(reversed_password, _ranked_dictionaries)
@@ -111,14 +111,14 @@ export function set_user_input_dictionary(ordered_list: string[]): void {
  */
 export function relevant_l33t_subtable(
   password: string,
-  table: Record<string, string[]>
+  table: Record<string, string[]>,
 ): Record<string, string[]> {
   const password_chars = new Set(password.split(""));
   const subtable: Record<string, string[]> = {};
 
   for (const letter in table) {
     const relevant_subs = table[letter].filter((sub) =>
-      password_chars.has(sub)
+      password_chars.has(sub),
     );
     if (relevant_subs.length > 0) {
       subtable[letter] = relevant_subs;
@@ -147,7 +147,7 @@ function dedup(subs: [string, string][][]) {
 function helper(
   keys: string[],
   table: Record<string, string[]>,
-  subs: [string, string][][] = [[]]
+  subs: [string, string][][] = [[]],
 ): [string, string][][] {
   if (!keys.length) return subs;
 
@@ -171,7 +171,7 @@ function helper(
  * @param table The table to create l33t substitutions for.
  */
 export function enumerate_l33t_subs(
-  table: Record<string, string[]>
+  table: Record<string, string[]>,
 ): Record<string, string>[] {
   return helper(Object.keys(table), table).map((s) => {
     const sub_dictionary: Record<string, string> = {};
@@ -203,11 +203,11 @@ const L33T_TABLE = {
 export function l33t_match(
   password: string,
   _ranked_dictionaries = RANKED_DICTIONARIES,
-  _l33t_table: Record<string, string[]> = L33T_TABLE
+  _l33t_table: Record<string, string[]> = L33T_TABLE,
 ): IDictionaryMatch[] {
   const matches: IDictionaryMatch[] = [];
   for (const sub of enumerate_l33t_subs(
-    relevant_l33t_subtable(password, _l33t_table)
+    relevant_l33t_subtable(password, _l33t_table),
   )) {
     if (empty(sub)) {
       break; // corner case: password has no relevant subs.
@@ -215,7 +215,7 @@ export function l33t_match(
     const subbed_password = translate(password, sub);
     for (const match of dictionary_match(
       subbed_password,
-      _ranked_dictionaries
+      _ranked_dictionaries,
     )) {
       const token = password.slice(match.i, match.j + 1);
       if (token.toLowerCase() === match.matched_word) {
@@ -240,11 +240,11 @@ export function l33t_match(
   return sorted(
     matches.filter(
       (
-        match // filter single-character l33t matches to reduce noise.
+        match, // filter single-character l33t matches to reduce noise.
       ) =>
         // otherwise '1' matches 'i', '4' matches 'a', both very common English words
         // with low dictionary rank.
-        match.token.length > 1
-    )
+        match.token.length > 1,
+    ),
   );
 }

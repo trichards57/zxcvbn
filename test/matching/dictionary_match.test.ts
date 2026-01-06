@@ -143,7 +143,7 @@ describe("matching", () => {
       for (const { password, i, j } of generatePasswords(
         word,
         prefixes,
-        suffixes
+        suffixes,
       )) {
         const expected: IDictionaryMatch[] = [
           {
@@ -246,7 +246,7 @@ describe("matching", () => {
 
       const actual = dictionary_match(word);
       const filtered = actual.filter(
-        (m) => m.dictionary_name === "user_inputs"
+        (m) => m.dictionary_name === "user_inputs",
       );
 
       expect(filtered).toStrictEqual(expected);

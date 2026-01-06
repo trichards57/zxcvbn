@@ -7,7 +7,7 @@ interface IPassword {
 export function generatePasswords(
   pattern: string,
   prefixes: string[],
-  suffixes: string[]
+  suffixes: string[],
 ): IPassword[] {
   const result: IPassword[] = [];
   for (const prefix of prefixes) {

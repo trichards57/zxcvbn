@@ -97,7 +97,7 @@ $\
             parseInt(token.slice(0, k)),
             parseInt(token.slice(k, l)),
             parseInt(token.slice(l)),
-          ])
+          ]),
         )
         .filter((d) => d) as IDMY[];
       if (!(candidates.length > 0)) continue;
@@ -172,7 +172,7 @@ $\
         }
       }
       return !is_submatch;
-    })
+    }),
   );
 }
 

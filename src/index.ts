@@ -18,7 +18,7 @@ export interface IZXCVBNResult extends IAttackTimes {
 
 export function zxcvbn(
   password: string,
-  user_inputs: (string | number | boolean)[] = []
+  user_inputs: (string | number | boolean)[] = [],
 ): IZXCVBNResult {
   const start = time();
   // reset the user inputs matcher on a per-request basis to keep things stateless

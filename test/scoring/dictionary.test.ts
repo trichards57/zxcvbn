@@ -111,7 +111,7 @@ describe("scoring", () => {
 
       const actual = dictionary_guesses(match);
       expect(actual).toBe(
-        32 * l33t_variations(match) * uppercase_variations(match)
+        32 * l33t_variations(match) * uppercase_variations(match),
       );
     });
   });

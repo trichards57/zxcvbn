@@ -122,7 +122,7 @@ describe("matching", () => {
       for (const { password, i, j } of generatePasswords(
         pattern,
         prefixes,
-        suffixes
+        suffixes,
       )) {
         const expected: IDateMatch[] = [
           {
