@@ -1,4 +1,4 @@
-import { IMatch } from "./support";
+import type { IMatch } from "./support";
 
 const MAX_DELTA = 5;
 

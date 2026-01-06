@@ -1,4 +1,4 @@
-import { ISequenceMatch } from "../matching/sequence_match";
+import type { ISequenceMatch } from "../matching/sequence_match";
 
 export function sequence_guesses(match: ISequenceMatch): number {
   let base_guesses;

@@ -1,4 +1,4 @@
-import { IDictionaryMatch } from "../../src/matching/dictionary_match";
+import type { IDictionaryMatch } from "../../src/matching/dictionary_match";
 import { estimate_guesses } from "../../src/scoring";
 import {
   dictionary_guesses,

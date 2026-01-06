@@ -1,5 +1,5 @@
 import { omnimatch } from "../../src/matching";
-import { IRepeatMatch } from "../../src/matching/repeat_match";
+import type { IRepeatMatch } from "../../src/matching/repeat_match";
 import {
   estimate_guesses,
   most_guessable_match_sequence,

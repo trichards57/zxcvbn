@@ -1,6 +1,6 @@
 import { omnimatch } from "../matching";
 import { most_guessable_match_sequence } from "../scoring";
-import { IMatch } from "./support";
+import type { IMatch } from "./support";
 
 export interface IRepeatMatch extends IMatch {
   pattern: "repeat";

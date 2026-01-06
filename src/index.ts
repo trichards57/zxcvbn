@@ -1,8 +1,8 @@
-import { IAnyMatch, omnimatch } from "./matching";
-import { estimate_attack_times, IAttackTimes } from "./time_estimates";
-import { get_feedback, IFeedbackItem } from "./feedback";
-import { most_guessable_match_sequence } from "./scoring";
+import { get_feedback, type IFeedbackItem } from "./feedback";
+import { type IAnyMatch, omnimatch } from "./matching";
 import { set_user_input_dictionary } from "./matching/dictionary_match";
+import { most_guessable_match_sequence } from "./scoring";
+import { estimate_attack_times, type IAttackTimes } from "./time_estimates";
 
 const time = () => new Date().getTime();
 

@@ -1,4 +1,4 @@
-import { IMatch, sorted } from "./support";
+import { type IMatch, sorted } from "./support";
 
 export interface IRegexMatch extends IMatch {
   pattern: "regex";

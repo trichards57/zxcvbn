@@ -1,5 +1,5 @@
 import { REFERENCE_YEAR } from "../scoring/support";
-import { IMatch, sorted } from "./support";
+import { type IMatch, sorted } from "./support";
 
 interface IDM {
   day: number;

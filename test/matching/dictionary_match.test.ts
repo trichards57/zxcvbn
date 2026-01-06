@@ -1,6 +1,6 @@
 import {
   dictionary_match,
-  IDictionaryMatch,
+  type IDictionaryMatch,
   reverse_dictionary_match,
   set_user_input_dictionary,
 } from "../../src/matching/dictionary_match";

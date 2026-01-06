@@ -1,5 +1,5 @@
 import {
-  ISequenceMatch,
+  type ISequenceMatch,
   sequence_match,
 } from "../../src/matching/sequence_match";
 import { generatePasswords } from "../test-support";

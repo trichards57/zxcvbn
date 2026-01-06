@@ -1,4 +1,4 @@
-import { IAnyMatch } from "../matching";
+import type { IAnyMatch } from "../matching";
 
 const BRUTEFORCE_CARDINALITY = 10;
 export const MIN_SUBMATCH_GUESSES_SINGLE_CHAR = 10;
