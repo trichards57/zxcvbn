@@ -76,7 +76,7 @@ function unwind(
   for (const candidate_l in optimal.g[k]) {
     const candidate_g = optimal.g[k][candidate_l];
     if (candidate_g < g) {
-      l = parseInt(candidate_l);
+      l = parseInt(candidate_l, 10);
       g = candidate_g;
     }
   }
@@ -112,7 +112,7 @@ function bruteforce_update(
     const object = optimal.m[i - 1];
 
     for (const l of Object.keys(object)) {
-      const i = parseInt(l);
+      const i = parseInt(l, 10);
       const last_m = object[i];
       if (last_m.pattern === "bruteforce") continue;
       update(password, optimal, m, i + 1, exclude_additive);
@@ -210,7 +210,7 @@ export function most_guessable_match_sequence(
     for (m of matches_by_j[k]) {
       if (m.i > 0) {
         for (const l of Object.keys(optimal.m[m.i - 1])) {
-          const len = parseInt(l);
+          const len = parseInt(l, 10);
           update(password, optimal, m, len + 1, _exclude_additive);
         }
       } else {

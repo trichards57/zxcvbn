@@ -94,10 +94,10 @@ $\
       const candidates: IDMY[] = DATE_SPLITS[token.length]
         .map(([k, l]) =>
           map_ints_to_dmy([
-            parseInt(token.slice(0, k)),
-            parseInt(token.slice(k, l)),
-            parseInt(token.slice(l)),
-          ]),
+            parseInt(token.slice(0, k), 10),
+            parseInt(token.slice(k, l), 10),
+            parseInt(token.slice(l), 10),
+          ])
         )
         .filter((d) => d) as IDMY[];
       if (!(candidates.length > 0)) continue;
@@ -136,9 +136,9 @@ $\
       if (!rx_match) continue;
 
       const dmy = map_ints_to_dmy([
-        parseInt(rx_match[1]),
-        parseInt(rx_match[3]),
-        parseInt(rx_match[4]),
+        parseInt(rx_match[1], 10),
+        parseInt(rx_match[3], 10),
+        parseInt(rx_match[4], 10),
       ]);
       if (!dmy) continue;
 
