@@ -14,7 +14,7 @@ export interface IZXCVBNResult extends IAttackTimes {
   feedback: IFeedbackItem;
 }
 
-export function zxcvbn(
+function zxcvbn(
   password: string,
   user_inputs: (string | number | boolean)[] = [],
 ): IZXCVBNResult {
