@@ -119,7 +119,7 @@ export function get_dictionary_match_feedback(
       } else {
         warning = "This is a very common password";
       }
-    } else if (match.guesses_log10 != undefined && match.guesses_log10 <= 4) {
+    } else if (match.guesses_log10 !== undefined && match.guesses_log10 <= 4) {
       warning = "This is similar to a commonly used password";
     }
   } else if (match.dictionary_name === "english_wikipedia") {
