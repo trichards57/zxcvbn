@@ -5,7 +5,7 @@ export const MIN_SUBMATCH_GUESSES_SINGLE_CHAR = 10;
 export const MIN_SUBMATCH_GUESSES_MULTI_CHAR = 50;
 
 export function bruteforce_guesses(match: IAnyMatch): number {
-  let guesses = Math.pow(BRUTEFORCE_CARDINALITY, match.token.length);
+  let guesses = BRUTEFORCE_CARDINALITY ** match.token.length;
   if (guesses === Number.POSITIVE_INFINITY) {
     guesses = Number.MAX_VALUE;
   }

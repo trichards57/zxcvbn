@@ -38,7 +38,7 @@ export function spatial_guesses(match: ISpatialMatch): number {
   for (let i = 2; i <= L; i++) {
     const possible_turns = Math.min(t, i - 1);
     for (let j = 1; j <= possible_turns; j++) {
-      guesses += nCk(i - 1, j - 1) * s * Math.pow(d, j);
+      guesses += nCk(i - 1, j - 1) * s * d ** j;
     }
   }
   // add extra guesses for shifted keys. (% instead of 5, A instead of a.)

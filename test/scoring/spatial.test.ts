@@ -115,7 +115,7 @@ describe("scoring", () => {
 
       for (let i = 2; i <= L; i++) {
         for (let j = 1; j <= Math.min(match.turns, i - 1); j++) {
-          expected += nCk(i - 1, j - 1) * s * Math.pow(d, j);
+          expected += nCk(i - 1, j - 1) * s * d ** j;
         }
       }
 

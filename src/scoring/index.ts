@@ -38,7 +38,7 @@ function update(
   // calculate the minimization func
   let g = factorial(l) * pi;
   if (!exclude_additive) {
-    g += Math.pow(MIN_GUESSES_BEFORE_GROWING_SEQUENCE, l - 1);
+    g += MIN_GUESSES_BEFORE_GROWING_SEQUENCE ** (l - 1);
   }
   // update state if new best.
   // first see if any competing sequences covering this prefix, with l or fewer matches,
