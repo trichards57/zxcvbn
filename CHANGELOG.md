@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.0.0-beta.0](https://github.com/trichards57/zxcvbn/compare/v5.0.1...v6.0.0-beta.0) (2026-01-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* Removes named export `zxcvbn`.
+* No-longer support Internet Explorer
+
+* implements the @typescript-eslint/strict rules ([a7f952e](https://github.com/trichards57/zxcvbn/commit/a7f952e48b50bf5fde5b4fd193a184bcb53bd227))
+* removes duplicate export from index file ([46fea9b](https://github.com/trichards57/zxcvbn/commit/46fea9b0a0132d5d7e1150c3cf7685ae495c7673))
+
 ### [5.0.1](https://github.com/trichards57/zxcvbn/compare/v5.0.0...v5.0.1) (2021-02-12)
 
 ## [5.0.0](https://github.com/trichards57/zxcvbn/compare/v5.0.0-beta.5...v5.0.0) (2020-10-28)
