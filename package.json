@@ -19,8 +19,7 @@
     }
   ],
   "scripts": {
-    "test": "jest",
-    "test:ci": "jest --coverage && coveralls < coverage/lcov.info",
+    "test": "vitest --globals",
     "build": "tsdown --minify",
     "check": "biome check",
     "check:fix": "biome check --write",
