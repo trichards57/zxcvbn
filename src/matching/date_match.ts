@@ -74,15 +74,8 @@ export function date_match(password: string): IDateMatch[] {
   // to every possible date match.
   const matches: IDateMatch[] = [];
   const maybe_date_no_separator = /^\d{4,8}$/;
-  const maybe_date_with_separator = new RegExp(`\
-^\
-(\\d{1,4})\
-([\\s/\\\\_.-])\
-(\\d{1,2})\
-\\2\
-(\\d{1,4})\
-$\
-`);
+  const maybe_date_with_separator =
+    /^(\d{1,4})([\s/\\_.-])(\d{1,2})\2(\d{1,4})$/;
 
   // dates without separators are between length 4 '1191' and 8 '11111991'
   for (let i = 0; i <= password.length - 4; i++) {
@@ -161,7 +154,7 @@ $\
   //
   // to reduce noise, remove date matches that are strict substrings of others
   return sorted(
-    matches.filter(function (match) {
+    matches.filter((match) => {
       let is_submatch = false;
       for (const other_match of matches) {
         if (match === other_match) continue;
@@ -172,7 +165,7 @@ $\
         }
       }
       return !is_submatch;
-    }),
+    })
   );
 }
 

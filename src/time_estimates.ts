@@ -92,7 +92,7 @@ export function display_time(seconds: number): string {
   }
 
   if (display_num !== undefined && display_num !== 1) {
-    return display_str + "s";
+    return `${display_str}s`;
   }
   return display_str;
 }
