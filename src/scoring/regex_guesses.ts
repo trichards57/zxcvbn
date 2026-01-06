@@ -1,4 +1,4 @@
-import { IRegexMatch } from "../matching/regex_match";
+import type { IRegexMatch } from "../matching/regex_match";
 import { MIN_YEAR_SPACE, REFERENCE_YEAR } from "./support";
 
 export function regex_guesses(match: IRegexMatch): number {

@@ -1,4 +1,4 @@
-import { IDateMatch } from "../matching/date_match";
+import type { IDateMatch } from "../matching/date_match";
 import { MIN_YEAR_SPACE, REFERENCE_YEAR } from "./support";
 
 export function date_guesses(match: IDateMatch): number {

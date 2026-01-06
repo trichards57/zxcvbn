@@ -1,4 +1,4 @@
-import { IDictionaryMatch } from "../matching/dictionary_match";
+import type { IDictionaryMatch } from "../matching/dictionary_match";
 import { nCk } from "./support";
 
 export const START_UPPER = /^[A-Z][^A-Z]+$/;

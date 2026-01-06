@@ -3,7 +3,7 @@ import frequency_lists from "../frequency_lists";
 // dictionary match (common passwords, english, last names, etc) ----------------
 //-------------------------------------------------------------------------------
 
-import { empty, IMatch, sorted, translate } from "./support";
+import { empty, type IMatch, sorted, translate } from "./support";
 
 export interface IDictionaryMatch extends IMatch {
   sub?: Record<string, string>;

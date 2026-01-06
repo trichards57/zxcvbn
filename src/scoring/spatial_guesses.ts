@@ -1,5 +1,5 @@
 import { keypad, qwerty } from "../adjacency_graphs";
-import { ISpatialMatch } from "../matching/spatial_match";
+import type { ISpatialMatch } from "../matching/spatial_match";
 import { nCk } from "./support";
 
 export const KEYBOARD_AVERAGE_DEGREE = calc_average_degree(qwerty);

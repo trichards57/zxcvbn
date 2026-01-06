@@ -1,4 +1,4 @@
-import { ISequenceMatch } from "../../src/matching/sequence_match";
+import type { ISequenceMatch } from "../../src/matching/sequence_match";
 import { estimate_guesses } from "../../src/scoring";
 import { sequence_guesses } from "../../src/scoring/sequence_guesses";
 

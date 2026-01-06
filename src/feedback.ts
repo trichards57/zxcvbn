@@ -1,5 +1,5 @@
-import { IAnyMatch } from "./matching";
-import { IDictionaryMatch } from "./matching/dictionary_match";
+import type { IAnyMatch } from "./matching";
+import type { IDictionaryMatch } from "./matching/dictionary_match";
 import { ALL_UPPER, START_UPPER } from "./scoring/dictionary_guesses";
 
 export interface IFeedbackItem {

@@ -1,4 +1,4 @@
-import { ISpatialMatch } from "../../src/matching/spatial_match";
+import type { ISpatialMatch } from "../../src/matching/spatial_match";
 import { estimate_guesses } from "../../src/scoring";
 import {
   KEYBOARD_AVERAGE_DEGREE,

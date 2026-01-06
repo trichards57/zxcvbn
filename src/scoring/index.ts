@@ -1,4 +1,4 @@
-import { IAnyMatch, IBruteForceMatch } from "../matching";
+import type { IAnyMatch, IBruteForceMatch } from "../matching";
 import {
   bruteforce_guesses,
   MIN_SUBMATCH_GUESSES_MULTI_CHAR,

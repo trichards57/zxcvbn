@@ -1,5 +1,5 @@
-import { IMatch, sorted } from "./support";
 import * as adjacency_graphs from "../adjacency_graphs";
+import { type IMatch, sorted } from "./support";
 
 export interface ISpatialMatch extends IMatch {
   pattern: "spatial";
