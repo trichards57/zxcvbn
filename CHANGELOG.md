@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.0.0](https://github.com/trichards57/zxcvbn/compare/v5.0.0...v6.0.0) (2026-01-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* Removes named export `zxcvbn`.
+* No-longer support Internet Explorer
+
+### Features
+
+* adds async top-level function ([6e6be50](https://github.com/trichards57/zxcvbn/commit/6e6be503ae6b670d80dfc3e2c0eccbeebafdc2da))
+* adds new async function to build and exports ([6e19817](https://github.com/trichards57/zxcvbn/commit/6e198174bce7cd84ceaf65bcf3c6243deb53232a))
+* **dictionary_match:** adds async dictionary_match ([9fb4461](https://github.com/trichards57/zxcvbn/commit/9fb44618de38c9fd913c6948d473c0ebf037e178))
+
+
+### Code Refactoring
+
+* implements the @typescript-eslint/strict rules ([a7f952e](https://github.com/trichards57/zxcvbn/commit/a7f952e48b50bf5fde5b4fd193a184bcb53bd227))
+* removes duplicate export from index file ([328f18a](https://github.com/trichards57/zxcvbn/commit/328f18ac07be4d737b08bc3354e57c1e785fe46d))
+
 ## [6.0.0-beta.0](https://github.com/trichards57/zxcvbn/compare/v5.0.1...v6.0.0-beta.0) (2026-01-06)
 
 
