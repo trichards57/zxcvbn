@@ -58,6 +58,7 @@
   ],
   "exports": {
     ".": "./dist/index.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./async": "./dist/async/index.js"
   }
 }

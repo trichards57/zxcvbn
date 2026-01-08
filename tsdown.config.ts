@@ -7,7 +7,6 @@ export default defineConfig([
     globalName: "zxcvbn",
     publint: true,
     sourcemap: true,
-    exports: true,
     dts: {
       enabled: true,
       sourcemap: true,
@@ -16,12 +15,18 @@ export default defineConfig([
   {
     entry: { index: "src/index_async.ts" },
     platform: "neutral",
-    name: "zxcvbn",
-    globalName: "zxcvbn",
+    name: "zxcvbn-async",
     outDir: "dist/async",
     publint: true,
     sourcemap: true,
-    exports: true,
+    exports: {
+      customExports(pkg) {
+        pkg["./async"] = "./dist/async/index.js";
+        pkg["."] = "./dist/index.js";
+
+        return pkg;
+      },
+    },
     dts: {
       enabled: true,
       sourcemap: true,
